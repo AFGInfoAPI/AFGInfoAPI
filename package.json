@@ -1,12 +1,12 @@
 {
-  "name": "typescript-express-mongoose-starter",
-  "version": "1.1.7",
+  "name": "afginfoapi",
+  "version": "1.0.0",
   "private": false,
-  "description": "TypeScript + Express + Mongoose + MongoDB",
+  "description": "Afghanistan information API",
   "license": "ISC",
-  "author": "Ahmad Joya",
+  "author": "AFGInfoAPI",
   "bin": {
-    "typescript-express-mongoose-starter": "./bin/cli.js"
+    "afginfoapi": "./bin/cli.js"
   },
   "scripts": {
     "start": "npm run build && cross-env NODE_ENV=production node dist/server.js",
@@ -85,23 +85,20 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ahmadjoya/typescript-express-mongoose-starter.git"
+    "url": "git+https://github.com/AFGInfoAPI/AFGInfoAPI.git"
   },
   "keywords": [
+    "Afghanistan",
+    "API",
+    "Afghanistan API",
+    "Information",
+    "NodeJS",
     "TypeScript",
     "Express",
-    "ExpressJS",
-    "express.js",
-    "mongoose",
-    "typescript express",
-    "typescript express mongoose",
-    "starter",
-    "boilerplate",
-    "typescript express mongooses tarter",
-    "typescript-express-mongooses-tarter"
+    "ExpressJS"
   ],
   "bugs": {
-    "url": "https://github.com/ahmadjoya/typescript-express-mongoose-starter/issues"
+    "url": "https://github.com/AFGInfoAPI/AFGInfoAPI.git/issues"
   },
-  "homepage": "https://github.com/ahmadjoya/typescript-express-mongoose-starter#readme"
+  "homepage": "https://github.com/AFGInfoAPI/AFGInfoAPI.git#readme"
 }
