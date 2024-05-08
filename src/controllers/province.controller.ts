@@ -6,11 +6,11 @@ class ProvinceController {
 
   public getProvinces = async (req: Request, res: Response, next: NextFunction) => {
     const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 10;
+    const per_page = parseInt(req.query.per_page as string) || 10;
 
     try {
-      const { provinces, total } = await this.provinceService.findAllProvinces(page, limit);
-      const total_page = Math.ceil(total / limit);
+      const { provinces, total } = await this.provinceService.findAllProvinces(page, per_page);
+      const total_page = Math.ceil(total / per_page);
 
       res.status(200).json({
         data: provinces,
@@ -18,7 +18,7 @@ class ProvinceController {
           total: total,
           current_page: page,
           total_page,
-          perPage: limit,
+          per_page: per_page,
         },
         message: 'findAll',
       });
