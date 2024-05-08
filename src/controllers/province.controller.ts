@@ -10,15 +10,15 @@ class ProvinceController {
 
     try {
       const { provinces, total } = await this.provinceService.findAllProvinces(page, limit);
-      const totalPages = Math.ceil(total / limit);
+      const total_page = Math.ceil(total / limit);
 
       res.status(200).json({
         data: provinces,
         meta: {
-          totalItems: total,
-          currentPage: page,
-          totalPages,
-          itemsPerPage: limit,
+          total: total,
+          current_page: page,
+          total_page,
+          perPage: limit,
         },
         message: 'findAll',
       });
