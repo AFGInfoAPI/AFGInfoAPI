@@ -1,3 +1,4 @@
+import { BASE_URL } from '@/config';
 import ProvinceService from '@/services/province.service';
 import { NextFunction, Request, Response } from 'express';
 
@@ -15,10 +16,22 @@ class ProvinceController {
 
     try {
       const { provinces, total } = await this.provinceService.findAllProvinces(page, per_page);
+
+      // Map images to full URL
+      const returnProvinces = provinces.map(province => {
+        return {
+          ...province,
+          images: province.images.map(image => {
+            return `${BASE_URL}/uploads/${image}`;
+          }),
+        };
+      });
+
+      // Calculate total pages for pagination
       const total_page = Math.ceil(total / per_page);
 
       res.status(200).json({
-        data: provinces,
+        data: returnProvinces,
         meta: {
           total: total,
           current_page: page,

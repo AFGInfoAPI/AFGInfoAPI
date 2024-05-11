@@ -7,7 +7,7 @@ class ProvinceService {
   public async findAllProvinces(page: number, limit: number): Promise<{ provinces: Province[]; total: number }> {
     const skip = (page - 1) * limit;
     const total = await this.provinces.countDocuments();
-    const provinces = await this.provinces.find().skip(skip).limit(limit);
+    const provinces = await this.provinces.find().skip(skip).limit(limit).lean();
     return { provinces, total };
   }
 
