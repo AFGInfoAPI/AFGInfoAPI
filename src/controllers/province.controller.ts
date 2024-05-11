@@ -55,6 +55,26 @@ class ProvinceController {
       next(error);
     }
   };
+
+  public getProvinceById = async (req: Request, res: Response, next: NextFunction) => {
+    const id = req.params.id;
+
+    try {
+      const province = await this.provinceService.findProvinceById(id);
+
+      // Map images to full URL
+      const returnProvince = {
+        ...province,
+        images: province.images.map(image => {
+          return `${BASE_URL}/uploads/${image}`;
+        }),
+      };
+
+      res.status(200).json({ data: returnProvince, message: 'findOne' });
+    } catch (error) {
+      next(error);
+    }
+  };
 }
 
 export default ProvinceController;

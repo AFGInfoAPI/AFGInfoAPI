@@ -12,7 +12,7 @@ class ProvinceService {
   }
 
   public async findProvinceById(provinceId: string) {
-    const province = await this.provinces.findOne({ _id: provinceId });
+    const province = await this.provinces.findOne({ _id: provinceId }).lean();
     return province;
   }
 

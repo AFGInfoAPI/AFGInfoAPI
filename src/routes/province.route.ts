@@ -24,6 +24,7 @@ class ProvinceRoute {
   private initializeRoutes() {
     this.router.get(`${this.path}`, this.provinceController.getProvinces);
     this.router.post(`${this.path}`, this.upload.array('images', 3), this.provinceController.createProvince);
+    this.router.get(`${this.path}/:id`, this.provinceController.getProvinceById);
   }
 }
 
