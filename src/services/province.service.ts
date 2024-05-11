@@ -16,12 +16,12 @@ class ProvinceService {
     return province;
   }
 
-  public async createProvince(provinceData) {
+  public async createProvince(provinceData: Province) {
     const createProvince = await this.provinces.create(provinceData);
     return createProvince;
   }
 
-  public async updateProvince(provinceId: string, provinceData) {
+  public async updateProvince(provinceId: string, provinceData: Province) {
     const updateProvince = await this.provinces.findByIdAndUpdate(provinceId, provinceData);
     return updateProvince;
   }
