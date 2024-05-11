@@ -75,6 +75,18 @@ class ProvinceController {
       next(error);
     }
   };
+
+  public updateProvince = async (req: Request, res: Response, next: NextFunction) => {
+    const id = req.params.id;
+    const provinceData = req.body;
+
+    try {
+      const province = await this.provinceService.updateProvince(id, provinceData);
+      res.status(200).json({ data: province, message: 'updated' });
+    } catch (error) {
+      next(error);
+    }
+  };
 }
 
 export default ProvinceController;
