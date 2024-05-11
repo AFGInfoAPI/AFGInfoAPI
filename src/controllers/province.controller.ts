@@ -1,6 +1,11 @@
 import ProvinceService from '@/services/province.service';
 import { NextFunction, Request, Response } from 'express';
 
+// Interface for MulterRequest
+interface MulterRequest extends Request {
+  files: Express.Multer.File[];
+}
+
 class ProvinceController {
   public provinceService = new ProvinceService();
 
@@ -22,6 +27,17 @@ class ProvinceController {
         },
         message: 'findAll',
       });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public createProvince = async (req: MulterRequest, res: Response, next: NextFunction) => {
+    try {
+      const provinceData = req.body;
+      const images = req.files.map((file: Express.Multer.File) => file.filename);
+      const province = await this.provinceService.createProvince({ ...provinceData, images });
+      res.status(201).json({ data: province, message: 'created' });
     } catch (error) {
       next(error);
     }
