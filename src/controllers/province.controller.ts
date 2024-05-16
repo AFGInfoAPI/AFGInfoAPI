@@ -1,6 +1,7 @@
 import { BASE_URL } from '@/config';
 import ProvinceService from '@/services/province.service';
 import { NextFunction, Request, Response } from 'express';
+import { Result, validationResult } from 'express-validator';
 
 // Interface for MulterRequest
 interface MulterRequest extends Request {
@@ -47,8 +48,22 @@ class ProvinceController {
 
   public createProvince = async (req: MulterRequest, res: Response, next: NextFunction) => {
     try {
+      const result: Result = validationResult(req);
+      if (!result.isEmpty()) {
+        const errorObject = result.array().reduce((acc, cur) => {
+          return { ...acc, [cur.path]: cur.msg };
+        }, {});
+
+        return res.status(400).json({ errors: errorObject });
+      }
+
       const provinceData = req.body;
-      const images = req.files.map((file: Express.Multer.File) => file.filename);
+      const images = Object.keys(req.files).reduce((acc, key) => {
+        if (key.startsWith('images[') && key.endsWith(']')) {
+          acc.push(req.files[key][0].filename);
+        }
+        return acc;
+      }, []);
       const province = await this.provinceService.createProvince({ ...provinceData, images });
       res.status(201).json({ data: province, message: 'created' });
     } catch (error) {

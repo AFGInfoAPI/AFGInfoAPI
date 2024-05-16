@@ -1,6 +1,8 @@
 import ProvinceController from '@/controllers/province.controller';
 import { Router } from 'express';
 import multer from 'multer';
+import { createProvinceValidation } from '@/middlewares/create.province.middlware';
+import { validateFile } from '@/middlewares/filevalidator.middleware';
 
 class ProvinceRoute {
   public path = '/provinces';
@@ -15,7 +17,17 @@ class ProvinceRoute {
       cb(null, uniqueSuffix + file.originalname);
     },
   });
-  private upload = multer({ storage: this.storage });
+
+  private upload = multer({
+    storage: this.storage,
+    fileFilter: (req, file, cb) => {
+      if (file.mimetype === 'image/jpeg' || file.mimetype === 'image/png' || file.mimetype === 'image/jpg') {
+        cb(null, true);
+      } else {
+        cb(new Error(`${file.fieldname}: File type is not supported`));
+      }
+    },
+  });
 
   constructor() {
     this.initializeRoutes();
@@ -24,10 +36,17 @@ class ProvinceRoute {
   private initializeRoutes() {
     // Create a new router to handle the upload routes
     const uploadRouter = Router();
-    uploadRouter.post('/', this.provinceController.createProvince);
+
+    // Generate an array of field configurations for multer
+    const fields = Array(10)
+      .fill(0)
+      .map((_, i) => ({ name: `images[${i}]` }));
+
+    uploadRouter.post('/', this.upload.fields(fields), validateFile, createProvinceValidation, this.provinceController.createProvince);
     uploadRouter.patch('/:id', this.provinceController.updateProvince);
 
-    this.router.use(`${this.path}`, this.upload.array('images', 3), uploadRouter);
+    // Use the upload router without multer middleware
+    this.router.use(`${this.path}`, uploadRouter);
 
     this.router.get(`${this.path}`, this.provinceController.getProvinces);
     this.router.get(`${this.path}/:id`, this.provinceController.getProvinceById);
