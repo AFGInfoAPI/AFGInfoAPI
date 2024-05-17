@@ -6,8 +6,8 @@ import APIFeatures from '@/utils/helpers/APIFeatures';
 class ProvinceService {
   public provinces = ProvinceModel;
 
-  public async findAllProvinces(page: number, limit: number): Promise<{ provincesData: Province[]; meta: Meta }> {
-    const features = new APIFeatures(this.provinces.find().lean(), { page, limit }).filter().sort().limitFields().paginate();
+  public async findAllProvinces(page: number, limit: number, name: string): Promise<{ provincesData: Province[]; meta: Meta }> {
+    const features = new APIFeatures(this.provinces.find().lean(), { page, limit, name }).filter().sort().limitFields().paginate();
     const provincesData = await features.query;
     const meta = await features.getMeta();
     return { meta, provincesData };

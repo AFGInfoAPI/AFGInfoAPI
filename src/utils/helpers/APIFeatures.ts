@@ -1,10 +1,12 @@
 class APIFeatures {
   public query: any;
   public queryString: any;
+  private cloneQuery: any;
 
   constructor(query, queryString) {
     this.query = query;
     this.queryString = queryString;
+    this.cloneQuery = query.clone();
   }
 
   public filter() {
@@ -17,6 +19,8 @@ class APIFeatures {
 
     this.query = this.query.find(JSON.parse(queryStr));
 
+    this.cloneQuery = this.query.clone();
+
     return this;
   }
 
@@ -24,8 +28,10 @@ class APIFeatures {
     if (this.queryString.sort) {
       const sortBy = this.queryString.sort.split(',').join(' ');
       this.query = this.query.sort(sortBy);
+      this.cloneQuery = this.query.clone();
     } else {
       this.query = this.query.sort('-createdAt');
+      this.cloneQuery = this.query.clone();
     }
 
     return this;
@@ -53,8 +59,8 @@ class APIFeatures {
   }
 
   public async getMeta() {
-    const total = await this.query.model.countDocuments();
-    const per_page = this.queryString.limit;
+    const total = await this.cloneQuery.countDocuments();
+    const per_page = parseInt(this.queryString.limit) || total;
     const total_page = Math.ceil(total / per_page);
     const current_page = parseInt(this.queryString.page) || 1;
 

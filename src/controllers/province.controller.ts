@@ -15,8 +15,9 @@ class ProvinceController {
   public getProvinces = async (req: Request, res: Response, next: NextFunction) => {
     const page = parseInt(req.query.page as string) || 1;
     const per_page = parseInt(req.query.per_page as string) || 10;
+    const name = req.query.name as string;
 
-    const { provincesData, meta } = await this.provinceService.findAllProvinces(page, per_page);
+    const { provincesData, meta } = await this.provinceService.findAllProvinces(page, per_page, name);
 
     // Map images to full URL
     const returnProvinces = attachImages(provincesData, ['images']);
