@@ -38,6 +38,10 @@ const provinceSchema = new Schema({
     type: String,
     required: true,
   },
+  governor: {
+    type: String,
+    required: true,
+  },
   images: {
     type: [String],
     required: true,
