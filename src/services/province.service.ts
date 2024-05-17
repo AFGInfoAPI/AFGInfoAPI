@@ -24,7 +24,6 @@ class ProvinceService {
   }
 
   public async updateProvince(provinceId: string, provinceData: Province) {
-    console.log({ provinceData });
     const updateProvince = await this.provinces.findByIdAndUpdate(provinceId, provinceData, { new: true });
     return updateProvince;
   }
