@@ -1,5 +1,6 @@
 import { BASE_URL } from '@/config';
 import ProvinceService from '@/services/province.service';
+import attachImages from '@/utils/helpers/attachImages';
 import { NextFunction, Request, Response } from 'express';
 import { Result, validationResult } from 'express-validator';
 
@@ -15,35 +16,16 @@ class ProvinceController {
     const page = parseInt(req.query.page as string) || 1;
     const per_page = parseInt(req.query.per_page as string) || 10;
 
-    try {
-      const { provinces, total } = await this.provinceService.findAllProvinces(page, per_page);
+    const { provincesData, meta } = await this.provinceService.findAllProvinces(page, per_page);
 
-      // Map images to full URL
-      const returnProvinces = provinces.map(province => {
-        return {
-          ...province,
-          images: province.images.map(image => {
-            return `${BASE_URL}/uploads/${image}`;
-          }),
-        };
-      });
+    // Map images to full URL
+    const returnProvinces = attachImages(provincesData, ['images']);
 
-      // Calculate total pages for pagination
-      const total_page = Math.ceil(total / per_page);
-
-      res.status(200).json({
-        data: returnProvinces,
-        meta: {
-          total: total,
-          current_page: page,
-          total_page,
-          per_page: per_page,
-        },
-        message: 'findAll',
-      });
-    } catch (error) {
-      next(error);
-    }
+    res.status(200).json({
+      data: returnProvinces,
+      meta,
+      message: 'findAll',
+    });
   };
 
   public createProvince = async (req: MulterRequest, res: Response, next: NextFunction) => {

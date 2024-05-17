@@ -1,14 +1,16 @@
 import Province from '@/interfaces/province.interface';
 import { ProvinceModel } from '@/models/province.model';
+import { Meta } from '@/types/meta';
+import APIFeatures from '@/utils/helpers/APIFeatures';
 
 class ProvinceService {
   public provinces = ProvinceModel;
 
-  public async findAllProvinces(page: number, limit: number): Promise<{ provinces: Province[]; total: number }> {
-    const skip = (page - 1) * limit;
-    const total = await this.provinces.countDocuments();
-    const provinces = await this.provinces.find().skip(skip).limit(limit).lean();
-    return { provinces, total };
+  public async findAllProvinces(page: number, limit: number): Promise<{ provincesData: Province[]; meta: Meta }> {
+    const features = new APIFeatures(this.provinces.find().lean(), { page, limit }).filter().sort().limitFields().paginate();
+    const provincesData = await features.query;
+    const meta = await features.getMeta();
+    return { meta, provincesData };
   }
 
   public async findProvinceById(provinceId: string) {
