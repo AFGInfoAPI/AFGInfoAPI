@@ -18,13 +18,16 @@ const provinceSchema = new Schema({
     type: Number,
     required: true,
   },
-  lat: {
-    type: Number,
-    required: true,
-  },
-  lng: {
-    type: Number,
-    required: true,
+  location: {
+    type: {
+      type: String,
+      enum: ['Point'],
+      required: true,
+    },
+    coordinates: {
+      type: [Number],
+      required: true,
+    },
   },
   googleMapUrl: {
     type: String,
@@ -48,6 +51,10 @@ const provinceSchema = new Schema({
   },
 });
 
+// Indexes for getting nearby provinces
+provinceSchema.index({ location: '2dsphere' });
+
+// Indexes for searching provinces
 provinceSchema.index({ name: 'text', capital: 'text' });
 
 export const ProvinceModel = model<Province & Document>('Province', provinceSchema);

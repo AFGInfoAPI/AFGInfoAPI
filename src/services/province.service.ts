@@ -3,6 +3,7 @@ import { ProvinceModel } from '@/models/province.model';
 import { Meta } from '@/types/meta';
 import APIFeatures from '@/utils/helpers/APIFeatures';
 import fs from 'fs';
+import GeoService from './nearest.service';
 
 class ProvinceService {
   public provinces = ProvinceModel;
@@ -57,6 +58,12 @@ class ProvinceService {
       });
     }
     return deleteProvince;
+  }
+
+  async getNearbyProvinces(lat: number, lng: number) {
+    const geoService = new GeoService(this.provinces);
+    const provinces = await geoService.findNearby(lat, lng);
+    return provinces;
   }
 }
 

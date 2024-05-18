@@ -3,6 +3,7 @@ import { Router } from 'express';
 import multer from 'multer';
 import { createProvinceValidation } from '@/middlewares/create.province.middlware';
 import { validateFile } from '@/middlewares/filevalidator.middleware';
+import nearByValidation from '@/middlewares/nearby.validation.middleware';
 
 class ProvinceRoute {
   public path = '/provinces';
@@ -51,6 +52,7 @@ class ProvinceRoute {
     // Use the upload router without multer middleware
     this.router.use(`${this.path}`, uploadRouter);
 
+    this.router.get(`${this.path}/nearbyProvinces`, nearByValidation, this.provinceController.getNearbyProvinces);
     this.router.get(`${this.path}`, this.provinceController.getProvinces);
     this.router.get(`${this.path}/:id`, this.provinceController.getProvinceById);
   }

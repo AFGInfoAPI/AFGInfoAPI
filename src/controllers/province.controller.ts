@@ -141,6 +141,34 @@ class ProvinceController {
       next(error);
     }
   };
+
+  public getNearbyProvinces = async (req: Request, res: Response, next: NextFunction) => {
+    const results: Result = validationResult(req);
+
+    if (!results.isEmpty()) {
+      const errorObject = results.array().reduce((acc, cur) => {
+        return { ...acc, [cur.path]: cur.msg };
+      }, {});
+
+      return res.status(400).json({ errors: errorObject });
+    }
+
+    const { lat, lng } = req.query;
+
+    if (!lat || !lng) {
+      return res.status(400).json({ error: 'Please provide latitude and longitude' });
+    }
+
+    try {
+      const nearbyProvinces = await this.provinceService.getNearbyProvinces(parseFloat(lat as string), parseFloat(lng as string));
+
+      // Map images to full URL
+      const returnProvinces = attachImages(nearbyProvinces, ['images']);
+      res.status(200).json({ data: returnProvinces, message: 'findNearby' });
+    } catch (error) {
+      next(error);
+    }
+  };
 }
 
 export default ProvinceController;

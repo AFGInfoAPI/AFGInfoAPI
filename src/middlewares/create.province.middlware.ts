@@ -1,6 +1,4 @@
 import { check } from 'express-validator';
-import fileType from 'file-type';
-import fs from 'fs';
 
 export const createProvinceValidation = [
   check('name')
