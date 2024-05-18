@@ -8,19 +8,16 @@ class GeoService {
   }
 
   public async findNearby(latitude: number, longitude: number, maxDistance?: number): Promise<any[]> {
-    const results = await this.model
-      .find({
-        location: {
-          $near: {
-            $geometry: {
-              type: 'Point',
-              coordinates: [longitude, latitude],
-            },
-            $maxDistance: maxDistance || 10000000000000,
-          },
+    const results = await this.model.aggregate([
+      {
+        $geoNear: {
+          near: { type: 'Point', coordinates: [longitude, latitude] },
+          distanceField: 'distance',
+          maxDistance: maxDistance || 10000000000000,
+          spherical: true,
         },
-      })
-      .lean();
+      },
+    ]);
 
     return results;
   }
