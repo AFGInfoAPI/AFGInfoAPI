@@ -3,6 +3,7 @@ import ProvinceService from '@/services/province.service';
 import attachImages from '@/utils/helpers/attachImages';
 import { NextFunction, Request, Response } from 'express';
 import { Result, validationResult } from 'express-validator';
+import fs from 'fs';
 
 // Interface for MulterRequest
 interface MulterRequest extends Request {
@@ -112,6 +113,30 @@ class ProvinceController {
     try {
       const province = await this.provinceService.deleteProvince(id);
       res.status(200).json({ data: province, message: 'deleted' });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public deleteProvinceImage = async (req: Request, res: Response, next: NextFunction) => {
+    const id = req.params.id;
+    const image_name = req.params.image_name;
+
+    try {
+      const province = await this.provinceService.findProvinceById(id);
+      const images = province.images;
+      const newImages = images.filter(image => image !== image_name);
+      province.images = newImages;
+      const response = await this.provinceService.updateProvince(id, province);
+
+      // Delete image from the server
+      const path = `uploads/${image_name}`;
+      fs.unlink(path, err => {
+        if (err) {
+          console.error(err);
+        }
+      });
+      res.status(200).json({ data: response, message: 'deleted' });
     } catch (error) {
       next(error);
     }

@@ -48,4 +48,6 @@ const provinceSchema = new Schema({
   },
 });
 
+provinceSchema.index({ name: 'text', capital: 'text' });
+
 export const ProvinceModel = model<Province & Document>('Province', provinceSchema);
