@@ -85,6 +85,26 @@ class ProvinceController {
       next(error);
     }
   };
+
+  public updateProvinceImages = async (req: MulterRequest, res: Response, next: NextFunction) => {
+    const id = req.params.id;
+
+    try {
+      const province = await this.provinceService.findProvinceById(id);
+      const images = province.images;
+      const newImages = Object.keys(req.files).reduce((acc, key) => {
+        if (key.startsWith('images[') && key.endsWith(']')) {
+          acc.push(req.files[key][0].filename);
+        }
+        return acc;
+      }, []);
+      province.images = [...images, ...newImages];
+      const response = await this.provinceService.updateProvince(id, province);
+      res.status(200).json({ data: response, message: 'updated' });
+    } catch (error) {
+      next(error);
+    }
+  };
 }
 
 export default ProvinceController;
