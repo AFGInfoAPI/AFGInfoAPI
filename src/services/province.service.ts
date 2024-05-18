@@ -2,6 +2,7 @@ import Province from '@/interfaces/province.interface';
 import { ProvinceModel } from '@/models/province.model';
 import { Meta } from '@/types/meta';
 import APIFeatures from '@/utils/helpers/APIFeatures';
+import fs from 'fs';
 
 class ProvinceService {
   public provinces = ProvinceModel;
@@ -29,7 +30,18 @@ class ProvinceService {
   }
 
   public async deleteProvince(provinceId: string) {
+    const provinceImages = await this.provinces.findById(provinceId).select('images');
     const deleteProvince = await this.provinces.findByIdAndDelete(provinceId);
+    if (deleteProvince) {
+      // Delete images from the server
+      provinceImages.images.forEach((image: string) => {
+        fs.unlink(`uploads/${image}`, err => {
+          if (err) {
+            console.error(err);
+          }
+        });
+      });
+    }
     return deleteProvince;
   }
 }

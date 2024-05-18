@@ -44,6 +44,7 @@ class ProvinceRoute {
 
     uploadRouter.post('/', this.upload.fields(fields), validateFile, createProvinceValidation, this.provinceController.createProvince);
     uploadRouter.patch('/:id', this.upload.fields(fields), this.provinceController.updateProvince);
+    uploadRouter.delete('/:id', this.provinceController.deleteProvince);
     uploadRouter.patch('/:id/add_images', this.upload.fields(fields), this.provinceController.updateProvinceImages);
 
     // Use the upload router without multer middleware

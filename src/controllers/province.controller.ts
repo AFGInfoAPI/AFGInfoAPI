@@ -105,6 +105,17 @@ class ProvinceController {
       next(error);
     }
   };
+
+  public deleteProvince = async (req: Request, res: Response, next: NextFunction) => {
+    const id = req.params.id;
+
+    try {
+      const province = await this.provinceService.deleteProvince(id);
+      res.status(200).json({ data: province, message: 'deleted' });
+    } catch (error) {
+      next(error);
+    }
+  };
 }
 
 export default ProvinceController;
