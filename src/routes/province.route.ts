@@ -4,6 +4,7 @@ import multer from 'multer';
 import { createProvinceValidation } from '@/middlewares/create.province.middlware';
 import { validateFile } from '@/middlewares/filevalidator.middleware';
 import nearByValidation from '@/middlewares/nearby.validation.middleware';
+import authMiddleware from '@/middlewares/auth.middleware';
 
 class ProvinceRoute {
   public path = '/provinces';
@@ -31,6 +32,7 @@ class ProvinceRoute {
   });
 
   constructor() {
+    this.router.use(authMiddleware);
     this.initializeRoutes();
   }
 
