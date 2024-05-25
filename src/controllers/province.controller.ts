@@ -48,7 +48,12 @@ class ProvinceController {
         }
         return acc;
       }, []);
-      const province = await this.provinceService.createProvince({ ...provinceData, images });
+
+      const location = {
+        type: 'Point',
+        coordinates: [Number(provinceData.lng), Number(provinceData.lat)],
+      };
+      const province = await this.provinceService.createProvince({ ...provinceData, images, location });
       res.status(201).json({ data: province, message: 'created' });
     } catch (error) {
       next(error);
