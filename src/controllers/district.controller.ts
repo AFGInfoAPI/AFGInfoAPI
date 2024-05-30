@@ -108,26 +108,21 @@ class DistrictController {
 
   public updateDistrictImages = async (req: MulterRequest, res: Response, next: NextFunction) => {
     const districtId = req.params.id;
-    const district = await this.districtService.findDistrictById(districtId);
 
-    if (district) {
-      const images = Object.keys(req.files).reduce((acc, key) => {
+    try {
+      const district = await this.districtService.findDistrictById(districtId);
+      const images = district.images;
+      const newImages = Object.keys(req.files).reduce((acc, key) => {
         if (key.startsWith('images[') && key.endsWith(']')) {
           acc.push(req.files[key][0].filename);
         }
         return acc;
       }, []);
-
-      const updatedImages = [...district.images, ...images];
-      const updatedDistrict = await this.districtService.updateDistrict(districtId, { ...district, images: updatedImages });
-
-      if (updatedDistrict) {
-        res.status(200).json({ data: updatedDistrict, message: 'updated' });
-      } else {
-        res.status(404).json({ message: 'District not found' });
-      }
-    } else {
-      res.status(404).json({ message: 'District not found' });
+      district.images = [...images, ...newImages];
+      const updatedDistrict = await this.districtService.updateDistrict(districtId, district);
+      res.status(200).json({ data: updatedDistrict, message: 'updated' });
+    } catch (error) {
+      next(error);
     }
   };
 
