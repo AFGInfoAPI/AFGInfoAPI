@@ -9,20 +9,9 @@ class ProvinceService {
   public provinces = ProvinceModel;
 
   public async findAllProvinces(page: number, limit: number, search: string): Promise<{ provincesData: Province[]; meta: Meta }> {
-    let query;
+    const query = this.provinces.find().lean();
 
-    if (search) {
-      const regex = new RegExp(search, 'i'); // 'i' makes it case insensitive
-      query = this.provinces
-        .find({
-          $or: [{ name: regex }, { capital: regex }],
-        })
-        .lean();
-    } else {
-      query = this.provinces.find().lean();
-    }
-
-    const features = new APIFeatures(query, { page, limit }).filter().sort().limitFields().paginate();
+    const features = new APIFeatures(query, { page, limit, search }, ['name', 'capital']).filter().sort().limitFields().paginate();
 
     const provincesData = await features.query;
     const meta = await features.getMeta();

@@ -8,18 +8,8 @@ import fs from 'fs';
 class DistrictService {
   public districts = DistrictModle;
   async findAllDistricts(page: number, limit: number, search: string): Promise<{ districtsData: District[]; meta: Meta }> {
-    let query;
-    if (search) {
-      const regex = new RegExp(search, 'i'); // 'i' makes it case insensitive
-      query = this.districts
-        .find({
-          $or: [{ name: regex }, { capital: regex }],
-        })
-        .lean();
-    } else {
-      query = this.districts.find().lean();
-    }
-    const features = new APIFeatures(query, { page, limit }).filter().sort().limitFields().paginate();
+    const query = this.districts.find().lean();
+    const features = new APIFeatures(query, { page, limit, search }, ['name', 'capital']).filter().sort().limitFields().paginate();
     const districtsData = await features.query;
     const meta = await features.getMeta();
     return { meta, districtsData };

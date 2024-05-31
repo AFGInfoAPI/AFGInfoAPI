@@ -2,17 +2,28 @@ class APIFeatures {
   public query: any;
   public queryString: any;
   private cloneQuery: any;
+  private searchFields: string[];
 
-  constructor(query, queryString) {
+  constructor(query, queryString, searchFields = []) {
     this.query = query;
     this.queryString = queryString;
     this.cloneQuery = query.clone();
+    this.searchFields = searchFields;
   }
 
   public filter() {
     const queryObj = { ...this.queryString };
     const excludedFields = ['page', 'sort', 'limit', 'fields'];
     excludedFields.forEach(el => delete queryObj[el]);
+
+    if (this.queryString.search) {
+      const regex = new RegExp(this.queryString.search, 'i'); // 'i' makes it case insensitive
+      this.query = this.query
+        .find({
+          $or: this.searchFields.map(field => ({ [field]: regex })),
+        })
+        .lean();
+    }
 
     let queryStr = JSON.stringify(queryObj);
     queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, match => `$${match}`);
