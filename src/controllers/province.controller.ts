@@ -18,10 +18,10 @@ class ProvinceController {
     const per_page = parseInt(req.query.per_page as string) || 10;
     const search = req.query.search as string;
 
-    const { provincesData, meta } = await this.provinceService.findAllProvinces(page, per_page, search);
+    const { data, meta } = await this.provinceService.findAll(page, per_page, search, ['name', 'capital']);
 
     // Map images to full URL
-    const returnProvinces = attachImages(provincesData, ['images']);
+    const returnProvinces = attachImages(data, ['images']);
 
     res.status(200).json({
       data: returnProvinces,
@@ -53,7 +53,7 @@ class ProvinceController {
         type: 'Point',
         coordinates: [Number(provinceData.lng), Number(provinceData.lat)],
       };
-      const province = await this.provinceService.createProvince({ ...provinceData, images, location });
+      const province = await this.provinceService.create({ ...provinceData, images, location });
       res.status(201).json({ data: province, message: 'created' });
     } catch (error) {
       next(error);
@@ -64,7 +64,7 @@ class ProvinceController {
     const id = req.params.id;
 
     try {
-      const province = await this.provinceService.findProvinceById(id);
+      const province = await this.provinceService.findById(id);
 
       // Map images to full URL
       const returnProvince = {
@@ -85,7 +85,7 @@ class ProvinceController {
     const provinceData = req.body;
 
     try {
-      const province = await this.provinceService.updateProvince(id, provinceData);
+      const province = await this.provinceService.update(id, provinceData);
       res.status(200).json({ data: province, message: 'updated' });
     } catch (error) {
       next(error);
@@ -96,7 +96,7 @@ class ProvinceController {
     const id = req.params.id;
 
     try {
-      const province = await this.provinceService.findProvinceById(id);
+      const province = await this.provinceService.findById(id);
       const images = province.images;
       const newImages = Object.keys(req.files).reduce((acc, key) => {
         if (key.startsWith('images[') && key.endsWith(']')) {
@@ -105,7 +105,7 @@ class ProvinceController {
         return acc;
       }, []);
       province.images = [...images, ...newImages];
-      const response = await this.provinceService.updateProvince(id, province);
+      const response = await this.provinceService.update(id, province);
       res.status(200).json({ data: response, message: 'updated' });
     } catch (error) {
       next(error);
@@ -116,7 +116,7 @@ class ProvinceController {
     const id = req.params.id;
 
     try {
-      const province = await this.provinceService.deleteProvince(id);
+      const province = await this.provinceService.delete(id);
       res.status(200).json({ data: province, message: 'deleted' });
     } catch (error) {
       next(error);
@@ -128,11 +128,11 @@ class ProvinceController {
     const image_name = req.params.image_name;
 
     try {
-      const province = await this.provinceService.findProvinceById(id);
+      const province = await this.provinceService.findById(id);
       const images = province.images;
       const newImages = images.filter(image => image !== image_name);
       province.images = newImages;
-      const response = await this.provinceService.updateProvince(id, province);
+      const response = await this.provinceService.update(id, province);
 
       // Delete image from the server
       const path = `uploads/${image_name}`;

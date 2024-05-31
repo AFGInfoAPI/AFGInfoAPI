@@ -1,4 +1,6 @@
-interface Province {
+import { Document } from 'mongoose';
+
+interface Province extends Document {
   _id: string;
   name: string;
   area: number;

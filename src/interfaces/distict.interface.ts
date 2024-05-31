@@ -1,4 +1,6 @@
-interface District {
+import { Document } from 'mongoose';
+
+interface District extends Document {
   id: number;
   name: string;
   capital: string;

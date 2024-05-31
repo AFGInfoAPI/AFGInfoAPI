@@ -18,7 +18,7 @@ class DistrictController {
     const per_page = parseInt(req.query.per_page as string) || 10;
     const search = req.query.search as string;
 
-    const { districtsData, meta } = await this.districtService.findAllDistricts(page, per_page, search);
+    const { data: districtsData, meta } = await this.districtService.findAll(page, per_page, search);
 
     // Map images to full URL
     const returnDistricts = attachImages(districtsData, ['images']);
@@ -53,7 +53,7 @@ class DistrictController {
         type: 'Point',
         coordinates: [Number(districtData.lng), Number(districtData.lat)],
       };
-      const district = await this.districtService.createDistrict({ ...districtData, images, location });
+      const district = await this.districtService.create({ ...districtData, images, location });
       res.status(201).json({ data: district, message: 'created' });
     } catch (error) {
       next(error);
@@ -62,7 +62,7 @@ class DistrictController {
 
   public getDistrictById = async (req: Request, res: Response, next: NextFunction) => {
     const districtId = req.params.id;
-    const district = await this.districtService.findDistrictById(districtId);
+    const district = await this.districtService.findById(districtId);
 
     if (district) {
       res.status(200).json({ data: district, message: 'findOne' });
@@ -85,7 +85,7 @@ class DistrictController {
       type: 'Point',
       coordinates: [Number(districtData.lng), Number(districtData.lat)],
     };
-    const updatedDistrict = await this.districtService.updateDistrict(districtId, { ...districtData, images, location });
+    const updatedDistrict = await this.districtService.update(districtId, { ...districtData, images, location });
 
     if (updatedDistrict) {
       res.status(200).json({ data: updatedDistrict, message: 'updated' });
@@ -97,9 +97,21 @@ class DistrictController {
   public deleteDistrict = async (req: Request, res: Response, next: NextFunction) => {
     const districtId = req.params.id;
 
-    const deletedDistrict = await this.districtService.deleteDistrict(districtId);
+    const district = await this.districtService.findById(districtId);
+    const images = district ? district.images : null;
+    const deletedDistrict = await this.districtService.delete(districtId);
 
     if (deletedDistrict) {
+      // Delete images from the server
+      if (images) {
+        images.forEach((image: string) => {
+          fs.unlink(`uploads/${image}`, err => {
+            if (err) {
+              console.error(err);
+            }
+          });
+        });
+      }
       res.status(200).json({ data: deletedDistrict, message: 'deleted' });
     } else {
       res.status(404).json({ message: 'District not found' });
@@ -110,7 +122,7 @@ class DistrictController {
     const districtId = req.params.id;
 
     try {
-      const district = await this.districtService.findDistrictById(districtId);
+      const district = await this.districtService.findById(districtId);
       const images = district.images;
       const newImages = Object.keys(req.files).reduce((acc, key) => {
         if (key.startsWith('images[') && key.endsWith(']')) {
@@ -119,7 +131,7 @@ class DistrictController {
         return acc;
       }, []);
       district.images = [...images, ...newImages];
-      const updatedDistrict = await this.districtService.updateDistrict(districtId, district);
+      const updatedDistrict = await this.districtService.update(districtId, district);
       res.status(200).json({ data: updatedDistrict, message: 'updated' });
     } catch (error) {
       next(error);
@@ -130,11 +142,11 @@ class DistrictController {
     const districtId = req.params.id;
     const imageName = req.params.imageName;
 
-    const district = await this.districtService.findDistrictById(districtId);
+    const district = await this.districtService.findById(districtId);
 
     if (district) {
       const updatedImages = district.images.filter(image => image !== imageName);
-      const updatedDistrict = await this.districtService.updateDistrict(districtId, { ...district, images: updatedImages });
+      const updatedDistrict = await this.districtService.update(districtId, { ...district, images: updatedImages });
 
       if (updatedDistrict) {
         fs.unlink(`uploads/${imageName}`, err => {
