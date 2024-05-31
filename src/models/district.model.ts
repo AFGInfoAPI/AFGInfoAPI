@@ -57,7 +57,7 @@ const districtSchema = new Schema(
     },
     last: {
       type: Boolean,
-      default: false,
+      default: true,
     },
   },
   { timestamps: true },
