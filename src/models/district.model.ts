@@ -55,6 +55,10 @@ const districtSchema = new Schema(
       ref: 'Province',
       required: true,
     },
+    last: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true },
 ); // Add timestamps to the schema

@@ -50,6 +50,10 @@ const provinceSchema = new Schema(
       type: [String],
       required: true,
     },
+    last: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true },
 );
