@@ -62,9 +62,10 @@ class ProvinceController {
 
   public getProvinceById = async (req: Request, res: Response, next: NextFunction) => {
     const id = req.params.id;
+    const lang = req.query.lang as string;
 
     try {
-      const province = await this.provinceService.findById(id);
+      const province = await this.provinceService.findById(id, { name: `$${lang}_name`, capital: 1, images: 1, governer: 1, area: 1 });
 
       // Map images to full URL
       const returnProvince = {

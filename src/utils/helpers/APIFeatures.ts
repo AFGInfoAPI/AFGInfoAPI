@@ -3,12 +3,14 @@ class APIFeatures {
   public queryString: any;
   private cloneQuery: any;
   private searchFields: string[];
+  private pipeline: any[];
 
   constructor(query, queryString, searchFields = []) {
     this.query = query;
     this.queryString = queryString;
     this.cloneQuery = query.clone();
     this.searchFields = searchFields;
+    this.pipeline = [];
   }
 
   public filter() {
@@ -17,20 +19,19 @@ class APIFeatures {
     excludedFields.forEach(el => delete queryObj[el]);
 
     if (this.queryString.search) {
+      console.log(this.searchFields, 'searchFields', this.queryString.search, 'search');
       const regex = new RegExp(this.queryString.search, 'i'); // 'i' makes it case insensitive
-      this.query = this.query
-        .find({
+      this.pipeline.push({
+        $match: {
           $or: this.searchFields.map(field => ({ [field]: regex })),
-        })
-        .lean();
+        },
+      });
     }
 
     let queryStr = JSON.stringify(queryObj);
     queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, match => `$${match}`);
 
-    this.query = this.query.find(JSON.parse(queryStr));
-
-    this.cloneQuery = this.query.clone();
+    this.pipeline.push({ $match: JSON.parse(queryStr) });
 
     return this;
   }
@@ -38,11 +39,9 @@ class APIFeatures {
   public sort() {
     if (this.queryString.sort) {
       const sortBy = this.queryString.sort.split(',').join(' ');
-      this.query = this.query.sort(sortBy);
-      this.cloneQuery = this.query.clone();
+      this.pipeline.push({ $sort: { [sortBy]: 1 } });
     } else {
-      this.query = this.query.sort('-createdAt');
-      this.cloneQuery = this.query.clone();
+      this.pipeline.push({ $sort: { createdAt: -1 } });
     }
 
     return this;
@@ -51,9 +50,13 @@ class APIFeatures {
   public limitFields() {
     if (this.queryString.fields) {
       const fields = this.queryString.fields.split(',').join(' ');
-      this.query = this.query.select(fields);
+      const project = fields.split(' ').reduce((acc, field) => {
+        acc[field] = 1;
+        return acc;
+      }, {});
+      this.pipeline.push({ $project: project });
     } else {
-      this.query = this.query.select('-__v');
+      this.pipeline.push({ $project: { __v: 0 } });
     }
 
     return this;
@@ -64,8 +67,16 @@ class APIFeatures {
     const limit = parseInt(this.queryString.limit) || 100;
     const skip = (page - 1) * limit;
 
-    this.query = this.query.skip(skip).limit(limit);
+    this.pipeline.push({ $skip: skip });
+    this.pipeline.push({ $limit: limit });
 
+    return this;
+  }
+
+  public projectFields(projectObj) {
+    if (Object.keys(projectObj).length > 0) {
+      this.pipeline.push({ $project: projectObj });
+    }
     return this;
   }
 
@@ -76,6 +87,10 @@ class APIFeatures {
     const current_page = parseInt(this.queryString.page) || 1;
 
     return { total, per_page, total_page, current_page };
+  }
+
+  public getPipeline() {
+    return this.pipeline;
   }
 }
 
