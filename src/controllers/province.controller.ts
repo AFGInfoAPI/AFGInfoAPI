@@ -17,9 +17,11 @@ class ProvinceController {
     const page = parseInt(req.query.page as string) || 1;
     const per_page = parseInt(req.query.per_page as string) || 10;
     const search = req.query.search as string;
+    const lang = req.query.lang as string;
     const searchFields = ['en_name', 'dr_name', 'ps_name', 'en_capital', 'dr_capital', 'ps_capital'];
-
-    const { data, meta } = await this.provinceService.findAll(page, per_page, search, searchFields);
+    const projectObj = lang ? { _id: 1, name: `$${lang}_name`, capital: `$${lang}_capital`, images: 1 } : {};
+    console.log('projectObj:==================', projectObj);
+    const { data, meta } = await this.provinceService.findAll(page, per_page, search, searchFields, projectObj);
 
     // Map images to full URL
     const returnProvinces = attachImages(data, ['images']);
