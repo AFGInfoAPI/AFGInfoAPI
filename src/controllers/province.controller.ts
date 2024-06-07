@@ -3,7 +3,6 @@ import ProvinceService from '@/services/province.service';
 import attachImages from '@/utils/helpers/attachImages';
 import { NextFunction, Request, Response } from 'express';
 import { Result, validationResult } from 'express-validator';
-import fs from 'fs';
 
 // Interface for MulterRequest
 interface MulterRequest extends Request {
@@ -19,15 +18,28 @@ class ProvinceController {
     const search = req.query.search as string;
     const lang = req.query.lang as string;
     const searchFields = ['en_name', 'dr_name', 'ps_name', 'en_capital', 'dr_capital', 'ps_capital'];
-    const projectObj = lang ? { _id: 1, name: `$${lang}_name`, capital: `$${lang}_capital`, images: 1 } : {};
-    console.log('projectObj:==================', projectObj);
+    const projectObj = lang
+      ? {
+          _id: 1,
+          name: `$${lang}_name`,
+          capital: `$${lang}_capital`,
+          images: 1,
+          description: `$${lang}_description`,
+          area: 1,
+          population: 1,
+          gdp: 1,
+          location: 1,
+          googleMapUrl: 1,
+          governor: `$${lang}_governor`,
+        }
+      : {};
     const { data, meta } = await this.provinceService.findAll(page, per_page, search, searchFields, projectObj);
 
     // Map images to full URL
-    const returnProvinces = attachImages(data, ['images']);
+    // const returnProvinces = attachImages(data, ['images']);
 
     res.status(200).json({
-      data: returnProvinces,
+      data: data,
       meta,
       message: 'findAll',
     });
@@ -47,7 +59,7 @@ class ProvinceController {
       const provinceData = req.body;
       const images = Object.keys(req.files).reduce((acc, key) => {
         if (key.startsWith('images[') && key.endsWith(']')) {
-          acc.push(req.files[key][0].filename);
+          acc.push(`${BASE_URL}/${req.files[key][0].filename}`);
         }
         return acc;
       }, []);
