@@ -15,23 +15,28 @@ class APIFeatures {
 
   public filter() {
     const queryObj = { ...this.queryString };
-    const excludedFields = ['page', 'sort', 'limit', 'fields'];
+    const excludedFields = ['page', 'sort', 'limit', 'fields', 'search']; // Exclude 'search' from queryObj
     excludedFields.forEach(el => delete queryObj[el]);
 
-    if (this.queryString.search) {
-      console.log(this.searchFields, 'searchFields', this.queryString.search, 'search');
+    console.log('filter:', queryObj);
+
+    if (this.queryString.search && this.searchFields.length > 0) {
       const regex = new RegExp(this.queryString.search, 'i'); // 'i' makes it case insensitive
       this.pipeline.push({
         $match: {
           $or: this.searchFields.map(field => ({ [field]: regex })),
         },
       });
+      console.log('search regex:', regex);
+      console.log('search fields:', this.searchFields);
     }
 
     let queryStr = JSON.stringify(queryObj);
     queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, match => `$${match}`);
 
-    this.pipeline.push({ $match: JSON.parse(queryStr) });
+    if (Object.keys(queryObj).length > 0) {
+      this.pipeline.push({ $match: JSON.parse(queryStr) });
+    }
 
     return this;
   }

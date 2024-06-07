@@ -14,6 +14,7 @@ class BaseService<T extends Document> {
     const features = new APIFeatures(query, { page, limit, search }, searchFields).filter().sort().limitFields().paginate().projectFields(projectObj); // Add projection fields
 
     const pipeline = features.getPipeline();
+    console.log('Aggregation Pipeline:', JSON.stringify(pipeline, null, 2));
 
     const data = await this.model.aggregate(pipeline).exec();
     const meta = await features.getMeta();
