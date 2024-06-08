@@ -3,11 +3,27 @@ import { Document, Schema, model } from 'mongoose';
 
 const districtSchema = new Schema(
   {
-    name: {
+    en_name: {
       type: String,
       required: true,
     },
-    capital: {
+    dr_name: {
+      type: String,
+      required: true,
+    },
+    ps_name: {
+      type: String,
+      required: true,
+    },
+    en_capital: {
+      type: String,
+      required: true,
+    },
+    dr_capital: {
+      type: String,
+      required: true,
+    },
+    ps_capital: {
       type: String,
       required: true,
     },
@@ -38,13 +54,17 @@ const districtSchema = new Schema(
       type: String,
       required: true,
     },
-    description: {
+    en_description: {
       type: String,
       required: true,
     },
-    governor: {
+    dr_description: {
       type: String,
-      required: false,
+      required: true,
+    },
+    ps_description: {
+      type: String,
+      required: true,
     },
     images: {
       type: [String],

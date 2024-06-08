@@ -17,8 +17,25 @@ class DistrictController {
     const page = parseInt(req.query.page as string) || 1;
     const per_page = parseInt(req.query.per_page as string) || 10;
     const search = req.query.search as string;
+    const searchFields = ['en_name', 'dr_name', 'ps_name', 'en_capital', 'en_capital', 'dr_capital', 'ps_capital'];
+    const lang = (req.query.lang as string) || 'en';
 
-    const { data: districtsData, meta } = await this.districtService.findAll(page, per_page, search);
+    // Fields to be selected
+    const projectObj =
+      lang === 'all'
+        ? {}
+        : {
+            _id: 1,
+            name: `$${lang}_name`,
+            capital: `$${lang}_capital`,
+            description: `$${lang}_description`,
+            images: ``,
+            location: 1,
+            area: 1,
+            population: 1,
+          };
+
+    const { data: districtsData, meta } = await this.districtService.findAll(page, per_page, search, searchFields, projectObj);
 
     // Map images to full URL
     const returnDistricts = attachImages(districtsData, ['images']);
@@ -62,7 +79,7 @@ class DistrictController {
 
   public getDistrictById = async (req: Request, res: Response, next: NextFunction) => {
     const districtId = req.params.id;
-    const district = await this.districtService.findById(districtId);
+    const district = await this.districtService.findById(districtId, {});
 
     if (district) {
       res.status(200).json({ data: district, message: 'findOne' });
@@ -97,7 +114,7 @@ class DistrictController {
   public deleteDistrict = async (req: Request, res: Response, next: NextFunction) => {
     const districtId = req.params.id;
 
-    const district = await this.districtService.findById(districtId);
+    const district = await this.districtService.findById(districtId, {});
     const images = district ? district.images : null;
     const deletedDistrict = await this.districtService.delete(districtId);
 
@@ -122,7 +139,7 @@ class DistrictController {
     const districtId = req.params.id;
 
     try {
-      const district = await this.districtService.findById(districtId);
+      const district = await this.districtService.findById(districtId, {});
       const images = district.images;
       const newImages = Object.keys(req.files).reduce((acc, key) => {
         if (key.startsWith('images[') && key.endsWith(']')) {
@@ -142,7 +159,7 @@ class DistrictController {
     const districtId = req.params.id;
     const imageName = req.params.imageName;
 
-    const district = await this.districtService.findById(districtId);
+    const district = await this.districtService.findById(districtId, {});
 
     if (district) {
       const updatedImages = district.images.filter(image => image !== imageName);

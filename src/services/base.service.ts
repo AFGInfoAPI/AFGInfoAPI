@@ -31,7 +31,7 @@ class BaseService<T extends Document> {
     }
     const data = await this.model.aggregate(locPipline).exec();
 
-    if (!data) throw new HttpException(404, 'Data not found');
+    if (data.length < 1) throw new HttpException(404, 'Data not found');
 
     if (data && data.length > 0) {
       return data[0]; // Return the first (and only) document in the result
