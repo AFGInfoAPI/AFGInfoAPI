@@ -1,6 +1,7 @@
 import mongoose, { Model, Document, UpdateQuery, PipelineStage } from 'mongoose';
 import APIFeatures from '@/utils/helpers/APIFeatures';
 import Province from '@/interfaces/province.interface';
+import { HttpException } from '@/exceptions/HttpException';
 
 class BaseService<T extends Document> {
   public model: Model<T>;
@@ -18,6 +19,7 @@ class BaseService<T extends Document> {
     console.log('Aggregation Pipeline:', JSON.stringify(pipeline, null, 2));
 
     const data = await this.model.aggregate(pipeline).exec();
+    if (!data) throw new HttpException(404, 'Data not found');
     const meta = await features.getMeta();
     return { meta, data };
   }
@@ -29,6 +31,8 @@ class BaseService<T extends Document> {
     }
     const data = await this.model.aggregate(locPipline).exec();
 
+    if (!data) throw new HttpException(404, 'Data not found');
+
     if (data && data.length > 0) {
       return data[0]; // Return the first (and only) document in the result
     }
@@ -38,16 +42,20 @@ class BaseService<T extends Document> {
 
   public async create(data: T): Promise<T> {
     const newData = await this.model.create(data);
+
+    if (!newData) throw new HttpException(500, 'Data not created');
     return newData;
   }
 
   public async update(id: string, data: UpdateQuery<T>): Promise<T> {
     const updatedData = await this.model.findByIdAndUpdate(id, data, { new: true });
+    if (!updatedData) throw new HttpException(404, 'Data not found');
     return updatedData;
   }
 
   public async delete(id: string): Promise<T> {
     const deletedData = await this.model.findByIdAndDelete(id);
+    if (!deletedData) throw new HttpException(404, 'Data not found');
     return deletedData;
   }
 }
