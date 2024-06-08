@@ -6,14 +6,17 @@ const provinceSchema = new Schema(
     en_name: {
       type: String,
       required: true,
+      unique: true,
     },
     dr_name: {
       type: String,
       required: true,
+      unique: true,
     },
     ps_name: {
       type: String,
       required: true,
+      unique: true,
     },
     area: {
       type: Number,

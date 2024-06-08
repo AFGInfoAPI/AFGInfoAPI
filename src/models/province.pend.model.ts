@@ -90,6 +90,7 @@ const provinceSchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: 'Province',
       required: true,
+      unique: true,
     },
   },
   { timestamps: true },
