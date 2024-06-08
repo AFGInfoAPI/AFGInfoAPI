@@ -33,6 +33,8 @@ class DistrictController {
             location: 1,
             area: 1,
             population: 1,
+            gdp: 1,
+            googleMapUrl: 1,
           };
 
     const { data: districtsData, meta } = await this.districtService.findAll(page, per_page, search, searchFields, projectObj);
