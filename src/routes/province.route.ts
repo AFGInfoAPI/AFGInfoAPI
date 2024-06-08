@@ -5,6 +5,7 @@ import { createProvinceValidation } from '@/middlewares/create.province.middlwar
 import { validateFile } from '@/middlewares/filevalidator.middleware';
 import nearByValidation from '@/middlewares/nearby.validation.middleware';
 import authMiddleware from '@/middlewares/auth.middleware';
+import { HttpException } from '@/exceptions/HttpException';
 
 class ProvinceRoute {
   public path = '/provinces';
@@ -26,7 +27,7 @@ class ProvinceRoute {
       if (file.mimetype === 'image/jpeg' || file.mimetype === 'image/png' || file.mimetype === 'image/jpg') {
         cb(null, true);
       } else {
-        cb(new Error(`${file.fieldname}: File type is not supported`));
+        cb(new HttpException(400, 'File type is not supported', { [file.fieldname]: 'File type is not supported' }));
       }
     },
   });
@@ -45,8 +46,8 @@ class ProvinceRoute {
       .fill(0)
       .map((_, i) => ({ name: `images[${i}]` }));
 
-    uploadRouter.post('/', this.upload.fields(fields), validateFile, createProvinceValidation, this.provinceController.createProvince);
-    uploadRouter.patch('/:id', this.upload.fields(fields), this.provinceController.updateProvince);
+    uploadRouter.post('/', this.upload.fields(fields), createProvinceValidation, this.provinceController.createProvince);
+    uploadRouter.patch('/:id', this.upload.fields(fields), createProvinceValidation, this.provinceController.updateProvince);
     uploadRouter.delete('/:id', this.provinceController.deleteProvince);
     uploadRouter.patch('/:id/images', this.upload.fields(fields), this.provinceController.updateProvinceImages);
     uploadRouter.delete('/:id/images/:image_name', this.provinceController.deleteProvinceImage);
