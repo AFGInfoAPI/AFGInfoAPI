@@ -81,7 +81,23 @@ class DistrictController {
 
   public getDistrictById = async (req: Request, res: Response, next: NextFunction) => {
     const districtId = req.params.id;
-    const district = await this.districtService.findById(districtId, {});
+    const lang = (req.query.lang as string) || 'en';
+    const projectObj =
+      lang !== 'all'
+        ? {
+            _id: 1,
+            name: `$${lang}_name`,
+            capital: `$${lang}_capital`,
+            images: 1,
+            description: `$${lang}_description`,
+            area: 1,
+            population: 1,
+            gdp: 1,
+            location: 1,
+            googleMapUrl: 1,
+          }
+        : {};
+    const district = await this.districtService.findById(districtId, projectObj);
 
     if (district) {
       res.status(200).json({ data: district, message: 'findOne' });
