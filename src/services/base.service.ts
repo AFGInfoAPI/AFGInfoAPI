@@ -1,6 +1,6 @@
 import mongoose, { Model, Document, UpdateQuery, PipelineStage } from 'mongoose';
 import APIFeatures from '@/utils/helpers/APIFeatures';
-import Province from '@/interfaces/province.interface';
+import { Province } from '@/interfaces/province.interface';
 import { HttpException } from '@/exceptions/HttpException';
 
 class BaseService<T extends Document> {

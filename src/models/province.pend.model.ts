@@ -1,4 +1,4 @@
-import { Province } from '@/interfaces/province.interface';
+import { ProvincePnd } from '@/interfaces/province.interface';
 import { Document, Schema, model } from 'mongoose';
 
 const provinceSchema = new Schema(
@@ -84,11 +84,12 @@ const provinceSchema = new Schema(
     },
     status: {
       type: Boolean,
-      default: true,
-    },
-    hasPending: {
-      type: Boolean,
       default: false,
+    },
+    province_id: {
+      type: Schema.Types.ObjectId,
+      ref: 'Province',
+      required: true,
     },
   },
   { timestamps: true },
@@ -100,4 +101,4 @@ provinceSchema.index({ location: '2dsphere' });
 // Indexes for searching provinces
 provinceSchema.index({ name: 'text', capital: 'text' });
 
-export const ProvinceModel = model<Province & Document>('Province', provinceSchema);
+export const ProvincePndModel = model<ProvincePnd & Document>('ProvincePnd', provinceSchema);

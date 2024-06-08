@@ -70,7 +70,7 @@ const districtSchema = new Schema(
       type: [String],
       required: true,
     },
-    provinceId: {
+    province_id: {
       type: Schema.Types.ObjectId,
       ref: 'Province',
       required: true,

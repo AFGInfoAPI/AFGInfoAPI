@@ -1,4 +1,4 @@
-import Province from '@/interfaces/province.interface';
+import { Province } from '@/interfaces/province.interface';
 import { ProvinceModel } from '@/models/province.model';
 import GeoService from './nearest.service';
 import BaseService from './base.service';
