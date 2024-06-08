@@ -24,7 +24,7 @@ class BaseService<T extends Document> {
     return { meta, data };
   }
 
-  public async findById(id: string, projectObj: { [key: string]: string | number | undefined }): Promise<Province | null> {
+  public async findById(id: string, projectObj: { [key: string]: string | number | undefined } = {}): Promise<Province | null> {
     const locPipline: PipelineStage[] = [{ $match: { _id: new mongoose.Types.ObjectId(id) } }];
     if (Object.keys(projectObj).length > 0) {
       locPipline.push({ $project: projectObj });

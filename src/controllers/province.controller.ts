@@ -1,4 +1,5 @@
 import { BASE_URL } from '@/config';
+import { ProvincePnd } from '@/interfaces/province.interface';
 import ProvincePndService from '@/services/province.pend.service';
 import ProvinceService from '@/services/province.service';
 import attachImages from '@/utils/helpers/attachImages';
@@ -34,6 +35,8 @@ class ProvinceController {
           location: 1,
           googleMapUrl: 1,
           governor: `$${lang}_governor`,
+          hasPending: 1,
+          status: 1,
         }
       : {};
     const { data, meta } = await this.provinceService.findAll(page, per_page, search, searchFields, projectObj);
@@ -94,6 +97,8 @@ class ProvinceController {
           location: 1,
           googleMapUrl: 1,
           governor: `$${lang}_governor`,
+          hasPending: 1,
+          status: 1,
         }
       : {};
 
@@ -131,8 +136,14 @@ class ProvinceController {
         type: 'Point',
         coordinates: [Number(provinceData.lng), Number(provinceData.lat)],
       };
-      const province = await this.provincePndService.create({ ...provinceData, images, location, province_id: id });
-      res.status(201).json({ data: province, message: 'created' });
+      const province = await this.provinceService.findById(id);
+      if (!province) {
+        return res.status(404).json({ message: 'Province not found' });
+      }
+
+      const pndProvince = await this.provincePndService.create({ ...provinceData, images, location, province_id: id });
+      await this.provinceService.update(id, { hasPending: true });
+      res.status(201).json({ data: pndProvince, message: 'created' });
     } catch (error) {
       next(error);
     }
@@ -216,6 +227,35 @@ class ProvinceController {
       // Map images to full URL
       const returnProvinces = attachImages(nearbyProvinces, ['images']);
       res.status(200).json({ data: returnProvinces, message: 'findNearby' });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public approveProvince = async (req: Request, res: Response, next: NextFunction) => {
+    const id = req.params.id;
+    const hasApproved = req.body.approved;
+
+    try {
+      if (hasApproved) {
+        // Get the province from the pending collection
+        const pndProvince = (await this.provincePndService.findById(id, {})) as ProvincePnd;
+        if (!pndProvince) {
+          return res.status(404).json({ message: 'pndProvince not found' });
+        }
+
+        // Delete the _id to avoid _id mutation
+        delete pndProvince._id;
+        const updatedProvince = await this.provinceService.update(pndProvince.province_id, { ...pndProvince, hasPending: false });
+
+        // Delete the pending province after approval
+        await this.provincePndService.delete(id);
+
+        res.status(200).json({ data: updatedProvince, message: 'approved' });
+      } else {
+        await this.provincePndService.delete(id);
+        res.status(200).json({ message: 'rejected' });
+      }
     } catch (error) {
       next(error);
     }
