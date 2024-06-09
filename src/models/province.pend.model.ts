@@ -40,7 +40,7 @@ const provinceSchema = new Schema(
 provinceSchema.index({ location: '2dsphere' });
 
 // Indexes for searching provinces
-provinceSchema.index({ name: 'text', capital: 'text' });
+provinceSchema.index({ en_name: 'text', dr_name: 'text', ps_name: 'text', en_capital: 'text', dr_capital: 'text', ps_capital: 'text' });
 
 // Pre-save middleware to check unique fields
 provinceSchema.pre('save', async function (next) {
