@@ -62,7 +62,14 @@ class ProvinceService extends BaseService<Province> {
 
   async getNearbyProvinces(lat: number, lng: number) {
     const geoService = new GeoService(this.provinces);
-    const provinces = await geoService.findNearby(lat, lng);
+    const provinces = await geoService.findNearby(lat, lng, null, [
+      {
+        $limit: 10,
+      },
+      {
+        $match: { status: true },
+      },
+    ]);
     return provinces;
   }
 }

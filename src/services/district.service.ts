@@ -59,7 +59,14 @@ class DistrictService extends BaseService<District> {
 
   async getNearbyDistrict(lat: number, long: number) {
     const geoService = new GeoService(this.districts);
-    const districts = await geoService.findNearby(lat, long);
+    const districts = await geoService.findNearby(lat, long, null, [
+      {
+        $limit: 10,
+      },
+      {
+        $match: { status: true },
+      },
+    ]);
     return districts;
   }
 }
