@@ -65,7 +65,7 @@ class ProvinceController {
       const provinceData = req.body;
       const images = Object.keys(req.files).reduce((acc, key) => {
         if (key.startsWith('images[') && key.endsWith(']')) {
-          acc.push(`${BASE_URL}/${req.files[key][0].filename}`);
+          acc.push(req.files[key][0].filename);
         }
         return acc;
       }, []);
@@ -127,7 +127,7 @@ class ProvinceController {
       const provinceData = req.body;
       const images = Object.keys(req.files).reduce((acc, key) => {
         if (key.startsWith('images[') && key.endsWith(']')) {
-          acc.push(`${BASE_URL}/${req.files[key][0].filename}`);
+          acc.push(req.files[key][0].filename);
         }
         return acc;
       }, []);
