@@ -1,4 +1,4 @@
-import District from '@/interfaces/distict.interface';
+import { District } from '@/interfaces/district.interface';
 import { Document, Schema, model } from 'mongoose';
 
 const districtSchema = new Schema(
@@ -75,13 +75,29 @@ const districtSchema = new Schema(
       ref: 'Province',
       required: true,
     },
-    last: {
+    dr_governor: {
+      type: String,
+      required: true,
+    },
+    en_governor: {
+      type: String,
+      required: true,
+    },
+    ps_governor: {
+      type: String,
+      required: true,
+    },
+    status: {
       type: Boolean,
       default: true,
     },
+    hasPending: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true },
-); // Add timestamps to the schema
+);
 
 // Indexes for getting nearby provinces
 districtSchema.index({ location: '2dsphere' });
