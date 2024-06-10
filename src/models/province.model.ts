@@ -26,7 +26,7 @@ const provinceSchema = new Schema(
     dr_governor: { type: String, required: true },
     ps_governor: { type: String, required: true },
     images: { type: [String], required: true },
-    status: { type: Boolean, default: true },
+    status: { type: Boolean, default: false },
     hasPending: { type: Boolean, default: false },
   },
   { timestamps: true },

@@ -232,7 +232,7 @@ class ProvinceController {
     }
   };
 
-  public approveProvince = async (req: Request, res: Response, next: NextFunction) => {
+  public approveProvinceUpdate = async (req: Request, res: Response, next: NextFunction) => {
     const id = req.params.id;
     const hasApproved = req.body.approved;
 
@@ -254,6 +254,33 @@ class ProvinceController {
         res.status(200).json({ data: updatedProvince, message: 'approved' });
       } else {
         await this.provincePndService.delete(id);
+        res.status(200).json({ message: 'rejected' });
+      }
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public approveProvince = async (req: Request, res: Response, next: NextFunction) => {
+    const id = req.params.id;
+    const hasApproved = req.body.approved;
+
+    try {
+      if (hasApproved) {
+        // Get the province from the province collection
+        const province = await this.provinceService.findById(id, {});
+        if (!province) {
+          return res.status(404).json({ message: 'province not found' });
+        }
+
+        if (!province?.status) {
+          const approvedProvince = await this.provinceService.update(id, { ...province, status: true });
+          res.status(200).json({ data: approvedProvince, message: 'approved' });
+        } else if (province.status) {
+          res.status(400).json({ message: 'Province is already approved!' });
+        }
+      } else {
+        await this.provinceService.delete(id);
         res.status(200).json({ message: 'rejected' });
       }
     } catch (error) {

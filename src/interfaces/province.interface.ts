@@ -11,6 +11,7 @@ export interface Province extends Document {
   googleMapUrl: string;
   capital: string;
   description: string;
+  status?: boolean;
   images: string[];
 }
 
