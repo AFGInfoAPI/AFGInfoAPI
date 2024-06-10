@@ -187,6 +187,9 @@ class ProvinceController {
     try {
       const province = await this.provinceService.findById(id, { images: 1, _id: 1 });
       const images = province.images;
+      if (!images.includes(image_name)) {
+        return res.status(404).json({ message: 'image not found' });
+      }
       const newImages = images.filter(image => image !== image_name);
       province.images = newImages;
       const response = await this.provinceService.update(id, province);
