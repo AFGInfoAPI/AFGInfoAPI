@@ -12,6 +12,7 @@ export interface District extends Document {
   capital: string;
   description: string;
   images: string[];
+  status?: boolean;
 }
 
 export interface DistrictPnd extends Document {

@@ -25,7 +25,6 @@ const provinceSchema = new Schema(
     dr_governor: { type: String, required: true },
     ps_governor: { type: String, required: true },
     images: { type: [String], required: true },
-    status: { type: Boolean, default: false },
     province_id: {
       type: Schema.Types.ObjectId,
       ref: 'Province',

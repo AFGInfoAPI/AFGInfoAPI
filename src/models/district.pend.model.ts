@@ -25,7 +25,6 @@ const districtSchema = new Schema(
     dr_governor: { type: String, required: true },
     ps_governor: { type: String, required: true },
     images: { type: [String], required: true },
-    status: { type: Boolean, default: false },
     district_id: {
       type: Schema.Types.ObjectId,
       ref: 'District',

@@ -89,7 +89,7 @@ const districtSchema = new Schema(
     },
     status: {
       type: Boolean,
-      default: true,
+      default: false,
     },
     hasPending: {
       type: Boolean,

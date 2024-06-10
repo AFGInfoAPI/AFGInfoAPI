@@ -228,7 +228,7 @@ class DistrictController {
     }
   };
 
-  public approveDistrict = async (req: Request, res: Response, next: NextFunction) => {
+  public approveDistrictUpdate = async (req: Request, res: Response, next: NextFunction) => {
     const id = req.params.id;
     const hasApproved = req.body.approved;
 
@@ -248,6 +248,32 @@ class DistrictController {
         res.status(200).json({ data: updateDistrict, message: 'approved' });
       } else {
         await this.districtPndService.delete(id);
+        res.status(200).json({ message: 'rejected' });
+      }
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public approveDistrict = async (req: Request, res: Response, next: NextFunction) => {
+    const id = req.params.id;
+    const hasApproved = req.body.approved;
+
+    try {
+      if (hasApproved) {
+        const district = await this.districtService.findById(id, {});
+        if (!district) {
+          return res.status(404).json({ message: 'No pending district found' });
+        }
+
+        if (!district.status) {
+          const approvedDistrict = await this.districtService.update(id, { ...district, status: true });
+          res.status(200).json({ data: approvedDistrict, message: 'approved' });
+        } else if (district.status) {
+          res.status(400).json({ message: 'District is already approved' });
+        }
+      } else {
+        await this.districtService.delete(id);
         res.status(200).json({ message: 'rejected' });
       }
     } catch (error) {
