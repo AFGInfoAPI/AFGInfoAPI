@@ -10,10 +10,10 @@ class BaseService<T extends Document> {
     this.model = model;
   }
 
-  public async findAll(page: number, limit: number, search: string, searchFields = [], projectObj = {}): Promise<{ data: T[]; meta: any }> {
+  public async findAll(filters = {}, searchFields = [], projectObj = {}): Promise<{ data: T[]; meta: any }> {
     const query = this.model.find().lean();
 
-    const features = new APIFeatures(query, { page, limit, search }, searchFields).filter().sort().limitFields().paginate().projectFields(projectObj); // Add projection fields
+    const features = new APIFeatures(query, { ...filters }, searchFields).filter().sort().limitFields().paginate().projectFields(projectObj); // Add projection fields
 
     const pipeline = features.getPipeline();
     console.log('Aggregation Pipeline:', JSON.stringify(pipeline, null, 2));

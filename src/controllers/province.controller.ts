@@ -1,4 +1,3 @@
-import { BASE_URL } from '@/config';
 import { ProvincePnd } from '@/interfaces/province.interface';
 import ProvincePndService from '@/services/province.pend.service';
 import ProvinceService from '@/services/province.service';
@@ -16,12 +15,13 @@ class ProvinceController {
   public provinceService = new ProvinceService();
   public provincePndService = new ProvincePndService();
 
-  public getProvinces = async (req: Request, res: Response, next: NextFunction) => {
+  public getProvinces = async (req: Request, res: Response) => {
     const page = parseInt(req.query.page as string) || 1;
     const per_page = parseInt(req.query.per_page as string) || 10;
     const search = req.query.search as string;
     const lang = req.query.lang as string;
     const searchFields = ['en_name', 'dr_name', 'ps_name', 'en_capital', 'dr_capital', 'ps_capital'];
+    const status = req.query.status === 'true' || true ? true : req.query.status === 'false' ? false : undefined;
     const projectObj = lang
       ? {
           _id: 1,
@@ -39,13 +39,13 @@ class ProvinceController {
           status: 1,
         }
       : {};
-    const { data, meta } = await this.provinceService.findAll(page, per_page, search, searchFields, projectObj);
+    const { data, meta } = await this.provinceService.findAll({ page, limit: per_page, search, status }, searchFields, projectObj);
 
     // Map images to full URL
-    // const returnProvinces = attachImages(data, ['images']);
+    const returnProvinces = attachImages(data, ['images']);
 
     res.status(200).json({
-      data: data,
+      data: returnProvinces,
       meta,
       message: 'findAll',
     });

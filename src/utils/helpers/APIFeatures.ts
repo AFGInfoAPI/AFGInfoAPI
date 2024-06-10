@@ -27,8 +27,6 @@ class APIFeatures {
           $or: this.searchFields.map(field => ({ [field]: regex })),
         },
       });
-      console.log('search regex:', regex);
-      console.log('search fields:', this.searchFields);
     }
 
     let queryStr = JSON.stringify(queryObj);

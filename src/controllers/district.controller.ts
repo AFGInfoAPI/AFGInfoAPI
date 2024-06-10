@@ -22,6 +22,12 @@ class DistrictController {
     const search = req.query.search as string;
     const lang = req.query.lang as string;
     const searchFields = ['en_name', 'dr_name', 'ps_name', 'en_capital', 'dr_capital', 'ps_capital'];
+    const status =
+      req.query.status === 'true' || req.query.status || req.query.status === '1'
+        ? true
+        : req.query.status === 'false' || req.query.status === '0'
+        ? false
+        : undefined;
     const projectObj = lang
       ? {
           _id: 1,
@@ -39,7 +45,7 @@ class DistrictController {
           status: 1,
         }
       : {};
-    const { data, meta } = await this.districtService.findAll(page, per_page, search, searchFields, projectObj);
+    const { data, meta } = await this.districtService.findAll({ page, limit: per_page, search, status }, searchFields, projectObj);
 
     // Map images to full URL
     // const returnDistricts = attachImages(data, ['images']);
