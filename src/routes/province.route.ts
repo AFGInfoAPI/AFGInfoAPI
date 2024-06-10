@@ -1,7 +1,7 @@
 import ProvinceController from '@/controllers/province.controller';
 import { Router } from 'express';
 import multer from 'multer';
-import { createProvinceValidation } from '@/middlewares/create.province.middlware';
+import { createProvinceValidation } from '@/middlewares/create.province.middleware';
 import { validateFile } from '@/middlewares/filevalidator.middleware';
 import nearByValidation from '@/middlewares/nearby.validation.middleware';
 import authMiddleware from '@/middlewares/auth.middleware';

@@ -1,11 +1,7 @@
-import District from '@/interfaces/distict.interface';
-import APIFeatures from '@/utils/helpers/APIFeatures';
-import { DistrictModle } from 'models/district.model';
-import { Meta } from '@/types/meta';
+import { District } from '@/interfaces/district.interface';
+import { DistrictModle } from '@/models/district.model';
 import GeoService from './nearest.service';
-import fs from 'fs';
 import BaseService from './base.service';
-import { Model } from 'mongoose';
 
 // class DistrictService {
 //   public districts = DistrictModle;
@@ -61,10 +57,10 @@ class DistrictService extends BaseService<District> {
     super(DistrictModle);
   }
 
-  async getNearestDistricts(lat: number, long: number) {
+  async getNearbyDistrict(lat: number, long: number) {
     const geoService = new GeoService(this.districts);
-    const nearestDistricts = await geoService.findNearby(lat, long);
-    return nearestDistricts;
+    const districts = await geoService.findNearby(lat, long);
+    return districts;
   }
 }
 export default DistrictService;
