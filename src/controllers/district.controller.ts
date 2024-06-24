@@ -1,4 +1,3 @@
-import { BASE_URL } from '@/config';
 import { DistrictPnd } from '@/interfaces/district.interface';
 import DistrictPndService from '@/services/district.pend.service';
 import DistrictService from '@/services/district.service';
@@ -16,18 +15,13 @@ class DistrictController {
   public districtService = new DistrictService();
   public districtPndService = new DistrictPndService();
 
-  public getDistricts = async (req: Request, res: Response, next: NextFunction) => {
+  public getDistricts = async (req: Request, res: Response) => {
     const page = parseInt(req.query.page as string) || 1;
     const per_page = parseInt(req.query.per_page as string) || 10;
     const search = req.query.search as string;
     const lang = req.query.lang as string;
     const searchFields = ['en_name', 'dr_name', 'ps_name', 'en_capital', 'dr_capital', 'ps_capital'];
-    const status =
-      req.query.status === 'true' || req.query.status || req.query.status === '1'
-        ? true
-        : req.query.status === 'false' || req.query.status === '0'
-        ? false
-        : undefined;
+    const status = req.query.status === 'true' || true ? true : req.query.status === 'false' ? false : undefined;
     const projectObj = lang
       ? {
           _id: 1,
@@ -48,10 +42,10 @@ class DistrictController {
     const { data, meta } = await this.districtService.findAll({ page, limit: per_page, search, status }, searchFields, projectObj);
 
     // Map images to full URL
-    // const returnDistricts = attachImages(data, ['images']);
+    const returnDistricts = attachImages(data, ['images']);
 
     res.status(200).json({
-      data: data,
+      data: returnDistricts,
       meta,
       message: 'findAll',
     });
@@ -64,6 +58,7 @@ class DistrictController {
         const errorObject = result.array().reduce((acc, cur) => {
           return { ...acc, [cur.path]: cur.msg };
         }, {});
+
         return res.status(400).json({ errors: errorObject });
       }
 
@@ -85,6 +80,7 @@ class DistrictController {
       next(error);
     }
   };
+
   public getDistrictById = async (req: Request, res: Response, next: NextFunction) => {
     const id = req.params.id;
     const lang = req.query.lang as string;
@@ -123,6 +119,7 @@ class DistrictController {
         const errorObject = result.array().reduce((acc, cur) => {
           return { ...acc, [cur.path]: cur.msg };
         }, {});
+
         return res.status(400).json({ errors: errorObject });
       }
 
@@ -189,6 +186,9 @@ class DistrictController {
     try {
       const district = await this.districtService.findById(id, { images: 1, _id: 1 });
       const images = district.images;
+      if (!images.includes(image_name)) {
+        return res.status(404).json({ message: 'Image not found' });
+      }
       const newImages = images.filter(image => image !== image_name);
       district.images = newImages;
       const response = await this.districtService.update(id, district);
@@ -240,6 +240,7 @@ class DistrictController {
 
     try {
       if (hasApproved) {
+        //get the pending district
         const pndDistrict = (await this.districtPndService.findById(id, {})) as DistrictPnd;
         if (!pndDistrict) {
           return res.status(404).json({ message: 'No pending district found' });
@@ -251,6 +252,7 @@ class DistrictController {
 
         //delete the pending district after approval
         await this.districtPndService.delete(id);
+
         res.status(200).json({ data: updateDistrict, message: 'approved' });
       } else {
         await this.districtPndService.delete(id);
@@ -272,7 +274,7 @@ class DistrictController {
           return res.status(404).json({ message: 'No pending district found' });
         }
 
-        if (!district.status) {
+        if (!district?.status) {
           const approvedDistrict = await this.districtService.update(id, { ...district, status: true });
           res.status(200).json({ data: approvedDistrict, message: 'approved' });
         } else if (district.status) {
