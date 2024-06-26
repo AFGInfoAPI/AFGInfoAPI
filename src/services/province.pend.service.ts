@@ -7,6 +7,18 @@ class ProvincePndService extends BaseService<ProvincePnd> {
   constructor() {
     super(ProvincePndModel);
   }
+
+  // Add the findOne method
+  public async findOne(query: object): Promise<ProvincePnd | null> {
+    try {
+      const result = await this.provinces.findOne(query).exec();
+      return result;
+    } catch (error) {
+      // Log the error or handle it as needed
+      console.error('Error finding document:', error);
+      throw error;
+    }
+  }
 }
 
 export default ProvincePndService;

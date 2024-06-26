@@ -288,6 +288,24 @@ class DistrictController {
       next(error);
     }
   };
+
+  // Add the getpandingDistricts method that get the districtId and return the pending district
+  public getPendingDistrict = async (req: Request, res: Response, next: NextFunction) => {
+    const districtId = req.params.district_Id;
+
+    try {
+      const query = { district_Id: districtId };
+      const pendingDistrict = await this.districtPndService.findOne(query);
+
+      if (!pendingDistrict) {
+        return res.status(404).json({ message: 'No pending district found for the provided district_Id' });
+      }
+
+      res.status(200).json({ data: pendingDistrict, message: 'findOne' });
+    } catch (error) {
+      next(error);
+    }
+  };
 }
 
 export default DistrictController;
