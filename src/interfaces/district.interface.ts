@@ -1,6 +1,6 @@
 import { Document } from 'mongoose';
 
-export interface Province extends Document {
+export interface District extends Document {
   _id: string;
   name: string;
   area: number;
@@ -15,7 +15,7 @@ export interface Province extends Document {
   images: string[];
 }
 
-export interface ProvincePnd extends Document {
+export interface DistrictPnd extends Document {
   _id: string;
   name: string;
   area: number;
@@ -27,5 +27,5 @@ export interface ProvincePnd extends Document {
   capital: string;
   description: string;
   images: string[];
-  province_id: string;
+  district_id: string;
 }

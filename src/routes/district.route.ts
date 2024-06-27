@@ -1,16 +1,16 @@
-import ProvinceController from '@/controllers/province.controller';
+import DistrictController from '@/controllers/district.controller';
 import { Router } from 'express';
 import multer from 'multer';
-import { createProvinceValidation } from '@/middlewares/create.province.middleware';
+import { createDistrictValidation } from '@/middlewares/create.district.middleware';
 import { validateFile } from '@/middlewares/filevalidator.middleware';
 import nearByValidation from '@/middlewares/nearby.validation.middleware';
 import authMiddleware from '@/middlewares/auth.middleware';
 import { HttpException } from '@/exceptions/HttpException';
 
-class ProvinceRoute {
-  public path = '/provinces';
+class DistrictRoute {
+  public path = '/districts';
   public router = Router();
-  public provinceController = new ProvinceController();
+  public districtController = new DistrictController();
   private storage = multer.diskStorage({
     destination: function (req, file, cb) {
       cb(null, 'uploads/');
@@ -46,22 +46,22 @@ class ProvinceRoute {
       .fill(0)
       .map((_, i) => ({ name: `images[${i}]` }));
 
-    uploadRouter.post('/', this.upload.fields(fields), createProvinceValidation, this.provinceController.createProvince);
-    uploadRouter.patch('/:id', this.upload.fields(fields), createProvinceValidation, this.provinceController.updateProvince);
-    uploadRouter.delete('/:id', this.provinceController.deleteProvince);
-    uploadRouter.patch('/:id/images', this.upload.fields(fields), this.provinceController.updateProvinceImages);
-    uploadRouter.delete('/:id/images/:image_name', this.provinceController.deleteProvinceImage);
+    uploadRouter.post('/', this.upload.fields(fields), createDistrictValidation, this.districtController.createDistrict);
+    uploadRouter.patch('/:id', this.upload.fields(fields), createDistrictValidation, this.districtController.updateDistrict);
+    uploadRouter.delete('/:id', this.districtController.deleteDistrict);
+    uploadRouter.patch('/:id/images', this.upload.fields(fields), this.districtController.updateDistrictImages);
+    uploadRouter.delete('/:id/images/:image_name', this.districtController.deleteDistrictImage);
 
     // Use the upload router without multer middleware
     this.router.use(`${this.path}`, uploadRouter);
 
-    this.router.get(`${this.path}/pending/:id`, this.provinceController.getPendingProvince);
-    this.router.post(`${this.path}/approve_update/:id`, this.provinceController.approveProvinceUpdate);
-    this.router.post(`${this.path}/approve/:id`, this.provinceController.approveProvince);
-    this.router.get(`${this.path}/nearbyProvinces`, nearByValidation, this.provinceController.getNearbyProvinces);
-    this.router.get(`${this.path}`, this.provinceController.getProvinces);
-    this.router.get(`${this.path}/:id`, this.provinceController.getProvinceById);
+    this.router.get(`${this.path}/pending/:id`, this.districtController.getPendingDistrict);
+    this.router.post(`${this.path}/approve_update/:id`, this.districtController.approveDistrictUpdate);
+    this.router.post(`${this.path}/approve/:id`, this.districtController.approveDistrict);
+    this.router.get(`${this.path}/nearbyDistricts`, nearByValidation, this.districtController.getNearbyDistricts);
+    this.router.get(`${this.path}`, this.districtController.getDistricts);
+    this.router.get(`${this.path}/:id`, this.districtController.getDistrictById);
   }
 }
 
-export default ProvinceRoute;
+export default DistrictRoute;

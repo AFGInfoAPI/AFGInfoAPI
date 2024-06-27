@@ -7,7 +7,7 @@ class GeoService {
     this.model = model;
   }
 
-  public async findNearby(latitude: number, longitude: number, maxDistance?: number): Promise<any[]> {
+  public async findNearby(latitude: number, longitude: number, maxDistance?: number, queryArr?: any[]): Promise<any[]> {
     const results = await this.model.aggregate([
       {
         $geoNear: {
@@ -16,7 +16,12 @@ class GeoService {
           maxDistance: maxDistance || 10000000000000,
           spherical: true,
         },
+        // Limit
+        // $limit: 10,
+        // Select provinces that it's status is true
+        // $match: { status: true },
       },
+      ...queryArr,
     ]);
 
     return results;

@@ -1,13 +1,12 @@
 import { HttpException } from '@/exceptions/HttpException';
-import { Province } from '@/interfaces/province.interface';
+import { ProvincePnd } from '@/interfaces/province.interface';
 import { Document, Schema, model } from 'mongoose';
 
-// Define the schema
 const provinceSchema = new Schema(
   {
-    en_name: { type: String, required: true, unique: true },
-    dr_name: { type: String, required: true, unique: true },
-    ps_name: { type: String, required: true, unique: true },
+    en_name: { type: String, required: true },
+    dr_name: { type: String, required: true },
+    ps_name: { type: String, required: true },
     area: { type: Number, required: true },
     population: { type: Number, required: true },
     gdp: { type: Number, required: true },
@@ -26,8 +25,12 @@ const provinceSchema = new Schema(
     dr_governor: { type: String, required: true },
     ps_governor: { type: String, required: true },
     images: { type: [String], required: true },
-    status: { type: Boolean, default: false },
-    hasPending: { type: Boolean, default: false },
+    province_id: {
+      type: Schema.Types.ObjectId,
+      ref: 'Province',
+      required: true,
+      unique: true,
+    },
   },
   { timestamps: true },
 );
@@ -42,18 +45,9 @@ provinceSchema.index({ en_name: 'text', dr_name: 'text', ps_name: 'text', en_cap
 provinceSchema.pre('save', async function (next) {
   try {
     if (this.isNew) {
-      const existingProvince = await ProvinceModel.findOne({
-        $or: [{ en_name: this.en_name }, { dr_name: this.dr_name }, { ps_name: this.ps_name }],
-      });
-
-      if (existingProvince) {
-        return next(
-          new HttpException(400, 'Province already exists', {
-            en_name: 'Province already exists',
-            dr_name: 'Province already exists',
-            ps_name: 'Province already exists',
-          }),
-        );
+      const existingWithProvinceId = await ProvincePndModel.findOne({ province_id: this.province_id });
+      if (existingWithProvinceId) {
+        return next(new HttpException(400, 'Province already has a pending version', { province_id: 'Province already has a pending version' }));
       }
     }
     next();
@@ -62,5 +56,4 @@ provinceSchema.pre('save', async function (next) {
   }
 });
 
-// Create and export the model
-export const ProvinceModel = model<Province & Document>('Province', provinceSchema);
+export const ProvincePndModel = model<ProvincePnd & Document>('ProvincePnd', provinceSchema);
