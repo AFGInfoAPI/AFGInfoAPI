@@ -17,7 +17,6 @@ const touristicPlacePndSchema = new Schema(
     },
     googleMapUrl: { type: String, required: true },
     images: { type: [String], required: true },
-    status: { type: Boolean, default: false },
     touristic_place_id: {
       type: Schema.Types.ObjectId,
       ref: 'TouristicPlace',
