@@ -20,6 +20,7 @@ const touristicPlaceSchema = new Schema(
     images: { type: [String], required: true },
     status: { type: Boolean, default: false },
     hasPending: { type: Boolean, default: false },
+    province_id: { type: Schema.Types.ObjectId, ref: 'Province', required: true },
   },
   { timestamps: true },
 );
