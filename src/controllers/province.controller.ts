@@ -254,6 +254,10 @@ class ProvinceController {
           return res.status(404).json({ message: 'pndProvince not found' });
         }
 
+        if (pndProvince?.images.length < 1) {
+          delete pndProvince.images;
+        }
+
         // Delete the _id to avoid _id mutation
         delete pndProvince._id;
         const updatedProvince = await this.provinceService.update(pndProvince.province_id, { ...pndProvince, hasPending: false });
