@@ -292,7 +292,7 @@ class ProvinceController {
   };
 
   public getPendingProvince = async (req: Request, res: Response, next: NextFunction) => {
-    const provincesId = req.query.province_Id;
+    const provincesId = req.params.province_Id;
 
     try {
       const query = { district_Id: provincesId };

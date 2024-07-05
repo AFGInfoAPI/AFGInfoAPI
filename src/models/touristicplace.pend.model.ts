@@ -10,6 +10,7 @@ const touristicPlacePndSchema = new Schema(
     en_description: { type: String, required: true },
     dr_description: { type: String, required: true },
     ps_description: { type: String, required: true },
+    isNationalPark: { type: Boolean, required: true },
     location: {
       type: { type: String, enum: ['Point'], required: true },
       coordinates: { type: [Number], required: true },

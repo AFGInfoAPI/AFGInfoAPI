@@ -29,6 +29,7 @@ class TouristicPlaceController {
           images: 1,
           description: `$${lang}_description`,
           location: 1,
+          isNationalPark: 1,
           googleMapUrl: 1,
           hasPending: 1,
           status: 1,
@@ -82,6 +83,7 @@ class TouristicPlaceController {
           description: `$${lang}_description`,
           location: 1,
           googleMapUrl: 1,
+          isNationalPark: 1,
           hasPending: 1,
           status: 1,
         }
@@ -106,7 +108,7 @@ class TouristicPlaceController {
         }, {});
         return res.status(400).json({ errors: errorObject });
       }
-      const touristicPlaceData: TouristicPlacePnd = req.body;
+      const touristicPlaceData = req.body;
       const images = Object.keys(req.files).reduce((acc, key) => {
         if (key.startsWith('images[') && key.endsWith(']')) {
           acc.push(req.files[key][0].filename);
@@ -118,11 +120,9 @@ class TouristicPlaceController {
         type: 'Point',
         coordinates: [Number(touristicPlaceData.lng), Number(touristicPlaceData.lat)],
       };
-      const touristicplace = await this.touristicPlaceService.update(id, { ...touristicPlaceData, images, location });
-      if (!touristicplace) {
-        return res.status(404).json({ message: 'not found' });
-      }
-      return res.status(200).json({ data: touristicplace, message: 'updated' });
+      const touristicplace = await this.touristicPlacePndService.create({ ...touristicPlaceData, images, location, touristic_place_id: id });
+      await this.touristicPlaceService.update(id, { hasPending: true });
+      return res.status(201).json({ data: touristicplace, message: 'updated' });
     } catch (error) {
       next(error);
     }
@@ -221,7 +221,7 @@ class TouristicPlaceController {
 
   public approveTouristicPlaceUpdate = async (req: Request, res: Response, next: NextFunction) => {
     const id = req.params.id;
-    const hasApproved = req.query.approved;
+    const hasApproved = req.body.approved;
 
     try {
       if (hasApproved) {
@@ -247,13 +247,13 @@ class TouristicPlaceController {
 
   public approveTouristicPlace = async (req: Request, res: Response, next: NextFunction) => {
     const id = req.params.id;
-    const hasApproved = req.query.approved;
+    const hasApproved = req.body.approved;
 
     try {
       if (hasApproved) {
         const touristicPlacePnd = await this.touristicPlaceService.findById(id, {});
         if (!touristicPlacePnd) {
-          return res.status(404).json({ message: 'not found' });
+          return res.status(404).json({ message: 'No pending touristic place found' });
         }
 
         if (!touristicPlacePnd?.status) {
@@ -262,7 +262,7 @@ class TouristicPlaceController {
         } else if (touristicPlacePnd.status) {
           res.status(200).json({ message: 'already approved' });
         } else {
-          await this.touristicPlacePndService.delete(id);
+          await this.touristicPlaceService.delete(id);
           res.status(200).json({ message: 'rejected' });
         }
       }
@@ -272,10 +272,11 @@ class TouristicPlaceController {
   };
 
   public getPendingTouristicPlaces = async (req: Request, res: Response, next: NextFunction) => {
-    const touristic_place_id = req.query.touristic_place_id;
+    const touristicplace_id = req.params.touristic_place_id;
 
     try {
-      const pendingTouristicPlaces = await this.touristicPlacePndService.findOne({ touristic_place_id });
+      const query = { touristic_place_id: touristicplace_id };
+      const pendingTouristicPlaces = await this.touristicPlacePndService.findOne(query);
 
       if (!pendingTouristicPlaces) {
         return res.status(404).json({ message: 'No pending touristic place found for the provided touristic_place_id' });

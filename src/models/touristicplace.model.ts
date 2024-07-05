@@ -11,15 +11,16 @@ const touristicPlaceSchema = new Schema(
     en_description: { type: String, required: true },
     dr_description: { type: String, required: true },
     ps_description: { type: String, required: true },
+    isNationalPark: { type: Boolean, default: false },
     location: {
       type: { type: String, enum: ['Point'], required: true },
       coordinates: { type: [Number], required: true },
     },
     googleMapUrl: { type: String, required: true },
+    province_id: { type: Schema.Types.ObjectId, ref: 'Province', required: true },
     images: { type: [String], required: true },
     status: { type: Boolean, default: false },
     hasPending: { type: Boolean, default: false },
-    province_id: { type: Schema.Types.ObjectId, ref: 'Province', required: true },
   },
   { timestamps: true },
 );
