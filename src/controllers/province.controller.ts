@@ -21,7 +21,13 @@ class ProvinceController {
     const search = req.query.search as string;
     const lang = req.query.lang as string;
     const searchFields = ['en_name', 'dr_name', 'ps_name', 'en_capital', 'dr_capital', 'ps_capital'];
-    const status = req.query.status === 'true' || true ? true : req.query.status === 'false' ? false : undefined;
+    let status;
+    if (req.query.status === 'true') {
+      status = true;
+    } else if (req.query.status === 'false') {
+      status = false;
+    }
+    // If req.query.status is neither 'true' nor 'false', status remains undefined
     const projectObj = lang
       ? {
           _id: 1,
