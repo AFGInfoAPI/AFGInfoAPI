@@ -1,7 +1,7 @@
 import TouristicPlaceController from '@/controllers/touristicplace.controller';
 import { Router } from 'express';
 import multer from 'multer';
-import { createTouristicPlaceValidation } from '@/middlewares/create.touristicplace,middleware';
+import { createTouristicPlaceValidation } from '@/middlewares/create.touristicplace.middleware';
 import { validateFile } from '@/middlewares/filevalidator.middleware';
 import nearByValidation from '@/middlewares/nearby.validation.middleware';
 import authMiddleware from '@/middlewares/auth.middleware';
@@ -55,12 +55,12 @@ class TouristicPlaceRoute {
     // Use the upload router without multer middleware
     this.router.use(`${this.path}`, uploadRouter);
 
+    this.router.get(`${this.path}`, this.touristicPlaceController.getTouristicPlaces);
     this.router.get(`${this.path}/pending/:id`, this.touristicPlaceController.getPendingTouristicPlaces);
     this.router.post(`${this.path}/approve_update/:id`, this.touristicPlaceController.approveTouristicPlaceUpdate);
     this.router.post(`${this.path}/approve/:id`, this.touristicPlaceController.approveTouristicPlace);
     this.router.get(`${this.path}/nearbyTouristicPlaces`, nearByValidation, this.touristicPlaceController.getNearbyTouristicPlaces);
     this.router.get(`${this.path}/:id`, this.touristicPlaceController.getTouristicPlaceById);
-    this.router.get(`${this.path}`, this.touristicPlaceController.getPendingTouristicPlaces);
   }
 }
 
