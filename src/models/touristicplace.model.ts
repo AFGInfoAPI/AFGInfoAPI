@@ -16,7 +16,6 @@ const touristicPlaceSchema = new Schema(
       coordinates: { type: [Number], required: true },
     },
     googleMapUrl: { type: String, required: true },
-    isNationalPark: { type: Boolean, required: true },
     images: { type: [String], required: true },
     status: { type: Boolean, default: false },
     hasPending: { type: Boolean, default: false },

@@ -48,11 +48,4 @@ export const createTouristicPlaceValidation = [
     .withMessage('Description must be a string'),
   check('lat').bail().notEmpty().withMessage('Latitude is required').bail().isNumeric().withMessage('Latitude must be a number'),
   check('lng').bail().notEmpty().withMessage('Longitude is required').bail().isNumeric().withMessage('Longitude must be a number'),
-  check('isNationalPark')
-    .bail()
-    .notEmpty()
-    .withMessage('isNationalPark is required')
-    .bail()
-    .isBoolean()
-    .withMessage('isNationalPark must be a boolean'),
 ];

@@ -21,7 +21,7 @@ class TouristicPlaceController {
     const search = req.query.search as string;
     const lang = req.query.lang as string;
     const searchFields = ['en_name', 'dr_name', 'ps_name'];
-    const status = req.query.status === 'true' ? true : req.query.status === 'false' ? false : undefined;
+    const status = req.query.status === 'true' || true ? true : req.query.status === 'false' ? false : undefined;
     const projectObj = lang
       ? {
           _id: 1,
@@ -30,7 +30,6 @@ class TouristicPlaceController {
           description: `$${lang}_description`,
           location: 1,
           googleMapUrl: 1,
-          isNationalPark: 1,
           hasPending: 1,
           status: 1,
         }
@@ -48,7 +47,7 @@ class TouristicPlaceController {
       const result: Result = validationResult(req);
       if (!result.isEmpty()) {
         const errorObject = result.array().reduce((acc, cur) => {
-          return { ...acc, [cur.param]: cur.msg };
+          return { ...acc, [cur.path]: cur.msg };
         }, {});
         return res.status(400).json({ errors: errorObject });
       }
@@ -83,7 +82,6 @@ class TouristicPlaceController {
           description: `$${lang}_description`,
           location: 1,
           googleMapUrl: 1,
-          isNationalPark: 1,
           hasPending: 1,
           status: 1,
         }
@@ -91,9 +89,6 @@ class TouristicPlaceController {
 
     try {
       const touristicplace = await this.touristicPlaceService.findById(id, projectObj);
-      if (!touristicplace) {
-        return res.status(404).json({ message: 'not found' });
-      }
       return res.status(200).json({ data: touristicplace, message: 'findOne' });
     } catch (error) {
       next(error);
@@ -107,7 +102,7 @@ class TouristicPlaceController {
       const result: Result = validationResult(req);
       if (!result.isEmpty()) {
         const errorObject = result.array().reduce((acc, cur) => {
-          return { ...acc, [cur.param]: cur.msg };
+          return { ...acc, [cur.path]: cur.msg };
         }, {});
         return res.status(400).json({ errors: errorObject });
       }
@@ -199,14 +194,14 @@ class TouristicPlaceController {
 
     if (!result.isEmpty()) {
       const errorObject = result.array().reduce((acc, cur) => {
-        return { ...acc, [cur.param]: cur.msg };
+        return { ...acc, [cur.path]: cur.msg };
       }, {});
       return res.status(400).json({ errors: errorObject });
     }
 
-    const { lat, lng, distance } = req.query;
+    const { lat, lng } = req.query;
 
-    if (!lat || !lng || !distance) {
+    if (!lat || !lng) {
       return res.status(400).json({ message: 'lat, lng, and distance are required' });
     }
 

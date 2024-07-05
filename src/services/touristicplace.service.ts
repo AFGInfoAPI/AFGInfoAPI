@@ -9,9 +9,9 @@ class TouristicPlaceService extends BaseService<TouristicPlace> {
     super(TouristicPlaceModel);
   }
 
-  async getNearbyTouristicPlaces(lat: number, long: number) {
+  async getNearbyTouristicPlaces(lat: number, lng: number) {
     const geoService = new GeoService(this.touristicPlaces);
-    const touristicPlaces = await geoService.findNearby(lat, long, null, [
+    const touristicPlaces = await geoService.findNearby(lat, lng, null, [
       {
         $limit: 10,
       },
