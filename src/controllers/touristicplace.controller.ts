@@ -97,7 +97,7 @@ class TouristicPlaceController {
     }
   };
 
-  public updateTouristicPlace = async (req: MuterRequest, res: Response, next: NextFunction) => {
+  public updateTouristicPlace = async (req: Request, res: Response, next: NextFunction) => {
     const id = req.params.id;
 
     try {
@@ -120,15 +120,20 @@ class TouristicPlaceController {
         type: 'Point',
         coordinates: [Number(touristicPlaceData.lng), Number(touristicPlaceData.lat)],
       };
-      const touristicplace = await this.touristicPlacePndService.create({ ...touristicPlaceData, images, location, touristic_place_id: id });
+      const touristicplace = await this.touristicPlaceService.findById(id);
+      if (!touristicplace) {
+        return res.status(404).json({ message: 'not found' });
+      }
+
+      const pendingTouristicPlace = await this.touristicPlacePndService.create({ ...touristicPlaceData, images, location, touristic_place_id: id });
       await this.touristicPlaceService.update(id, { hasPending: true });
-      return res.status(201).json({ data: touristicplace, message: 'updated' });
+      res.status(201).json({ data: pendingTouristicPlace, message: 'created' });
     } catch (error) {
       next(error);
     }
   };
 
-  public updateTouristicPlaceImages = async (req: Request, res: Response, next: NextFunction) => {
+  public updateTouristicPlaceImages = async (req: MuterRequest, res: Response, next: NextFunction) => {
     const id = req.params.id;
 
     try {
@@ -233,6 +238,7 @@ class TouristicPlaceController {
         const updateTouristicPlace = await this.touristicPlaceService.update(touristicPlacePnd.touristic_place_id, {
           ...touristicPlacePnd,
           hasPending: false,
+          status: true,
         });
         await this.touristicPlacePndService.delete(id);
         res.status(200).json({ data: updateTouristicPlace, message: 'approved' });

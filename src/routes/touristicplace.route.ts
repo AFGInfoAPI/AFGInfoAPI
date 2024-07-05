@@ -55,9 +55,9 @@ class TouristicPlaceRoute {
     // Use the upload router without multer middleware
     this.router.use(`${this.path}`, uploadRouter);
 
-    this.router.get(`${this.path}`, this.touristicPlaceController.getTouristicPlaces);
     this.router.get(`${this.path}/pending/:id`, this.touristicPlaceController.getPendingTouristicPlaces);
     this.router.post(`${this.path}/approve_update/:id`, this.touristicPlaceController.approveTouristicPlaceUpdate);
+    this.router.get(`${this.path}`, this.touristicPlaceController.getTouristicPlaces);
     this.router.post(`${this.path}/approve/:id`, this.touristicPlaceController.approveTouristicPlace);
     this.router.get(`${this.path}/nearbyTouristicPlaces`, nearByValidation, this.touristicPlaceController.getNearbyTouristicPlaces);
     this.router.get(`${this.path}/:id`, this.touristicPlaceController.getTouristicPlaceById);
