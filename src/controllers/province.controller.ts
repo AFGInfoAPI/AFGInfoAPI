@@ -110,8 +110,9 @@ class ProvinceController {
 
     try {
       const province = await this.provinceService.findById(id, projectObj);
+      const imageAttached = attachImages([province], ['images']);
 
-      res.status(200).json({ data: province, message: 'findOne' });
+      res.status(200).json({ data: imageAttached[0], message: 'findOne' });
     } catch (error) {
       next(error);
     }
