@@ -299,11 +299,29 @@ class ProvinceController {
   };
 
   public getPendingProvince = async (req: Request, res: Response, next: NextFunction) => {
-    const provincesId = req.query.province_Id;
+    const provincesId = req.params.id;
+    const lang = req.query.lang as string;
+
+    const projectObj = lang
+      ? {
+          _id: 1,
+          name: `$${lang}_name`,
+          capital: `$${lang}_capital`,
+          images: 1,
+          description: `$${lang}_description`,
+          area: 1,
+          population: 1,
+          gdp: 1,
+          location: 1,
+          googleMapUrl: 1,
+          governor: `$${lang}_governor`,
+          hasPending: 1,
+          status: 1,
+        }
+      : {};
 
     try {
-      const query = { district_Id: provincesId };
-      const pendingProvince = await this.provincePndService.findOne(query);
+      const pendingProvince = await this.provincePndService.findOne({ province_id: provincesId }, projectObj);
 
       if (!pendingProvince) {
         return res.status(404).json({ message: 'No pending province found for the provided province_Id' });
