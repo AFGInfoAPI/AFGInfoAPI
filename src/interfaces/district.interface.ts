@@ -11,8 +11,8 @@ export interface District extends Document {
   googleMapUrl: string;
   capital: string;
   description: string;
-  images: string[];
   status?: boolean;
+  images: string[];
 }
 
 export interface DistrictPnd extends Document {

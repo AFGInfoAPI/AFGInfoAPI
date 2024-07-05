@@ -1,3 +1,4 @@
+import { HttpException } from '@/exceptions/HttpException';
 import { District } from '@/interfaces/district.interface';
 import { Document, Schema, model } from 'mongoose';
 
@@ -104,5 +105,29 @@ districtSchema.index({ location: '2dsphere' });
 
 // Indexes for searching provinces
 districtSchema.index({ name: 'text', capital: 'text' });
+
+// Pre-save middleware to check unique fields
+districtSchema.pre('save', async function (next) {
+  try {
+    if (this.isNew) {
+      const existingDistrict = await DistrictModle.findOne({
+        $or: [{ en_name: this.en_name }, { dr_name: this.dr_name }, { ps_name: this.ps_name }],
+      });
+
+      if (existingDistrict) {
+        return next(
+          new HttpException(400, 'District already exists', {
+            en_name: 'District already exists',
+            dr_name: 'District already exists',
+            ps_name: 'District already exists',
+          }),
+        );
+      }
+    }
+    next();
+  } catch (error) {
+    next(error);
+  }
+});
 
 export const DistrictModle = model<District & Document>('District', districtSchema);

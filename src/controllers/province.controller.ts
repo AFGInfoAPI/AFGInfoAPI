@@ -296,6 +296,23 @@ class ProvinceController {
       next(error);
     }
   };
+
+  public getPendingProvince = async (req: Request, res: Response, next: NextFunction) => {
+    const provincesId = req.query.province_Id;
+
+    try {
+      const query = { district_Id: provincesId };
+      const pendingProvince = await this.provincePndService.findOne(query);
+
+      if (!pendingProvince) {
+        return res.status(404).json({ message: 'No pending province found for the provided province_Id' });
+      }
+
+      res.status(200).json({ data: pendingProvince, message: 'findOne' });
+    } catch (error) {
+      next(error);
+    }
+  };
 }
 
 export default ProvinceController;

@@ -55,6 +55,7 @@ class ProvinceRoute {
     // Use the upload router without multer middleware
     this.router.use(`${this.path}`, uploadRouter);
 
+    this.router.get(`${this.path}/pending/:id`, this.provinceController.getPendingProvince);
     this.router.post(`${this.path}/approve_update/:id`, this.provinceController.approveProvinceUpdate);
     this.router.post(`${this.path}/approve/:id`, this.provinceController.approveProvince);
     this.router.get(`${this.path}/nearbyProvinces`, nearByValidation, this.provinceController.getNearbyProvinces);

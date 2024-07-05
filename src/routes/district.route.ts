@@ -54,6 +54,8 @@ class DistrictRoute {
 
     // Use the upload router without multer middleware
     this.router.use(`${this.path}`, uploadRouter);
+
+    this.router.get(`${this.path}/pending/:id`, this.districtController.getPendingDistrict);
     this.router.post(`${this.path}/approve_update/:id`, this.districtController.approveDistrictUpdate);
     this.router.post(`${this.path}/approve/:id`, this.districtController.approveDistrict);
     this.router.get(`${this.path}/nearbyDistricts`, nearByValidation, this.districtController.getNearbyDistricts);
