@@ -21,7 +21,13 @@ class ProvinceController {
     const search = req.query.search as string;
     const lang = req.query.lang as string;
     const searchFields = ['en_name', 'dr_name', 'ps_name', 'en_capital', 'dr_capital', 'ps_capital'];
-    const status = req.query.status === 'true' || true ? true : req.query.status === 'false' ? false : undefined;
+    let status;
+    if (req.query.status === 'true') {
+      status = true;
+    } else if (req.query.status === 'false') {
+      status = false;
+    }
+    // If req.query.status is neither 'true' nor 'false', status remains undefined
     const projectObj = lang
       ? {
           _id: 1,
@@ -104,8 +110,9 @@ class ProvinceController {
 
     try {
       const province = await this.provinceService.findById(id, projectObj);
+      const imageAttached = attachImages([province], ['images']);
 
-      res.status(200).json({ data: province, message: 'findOne' });
+      res.status(200).json({ data: imageAttached[0], message: 'findOne' });
     } catch (error) {
       next(error);
     }
@@ -247,6 +254,10 @@ class ProvinceController {
           return res.status(404).json({ message: 'pndProvince not found' });
         }
 
+        if (pndProvince?.images.length < 1) {
+          delete pndProvince.images;
+        }
+
         // Delete the _id to avoid _id mutation
         delete pndProvince._id;
         const updatedProvince = await this.provinceService.update(pndProvince.province_id, { ...pndProvince, hasPending: false });
@@ -292,11 +303,30 @@ class ProvinceController {
   };
 
   public getPendingProvince = async (req: Request, res: Response, next: NextFunction) => {
-    const provincesId = req.params.province_Id;
+    const provincesId = req.params.id;
+    const lang = req.query.lang as string;
+
+    const projectObj = lang
+      ? {
+          _id: 1,
+          name: `$${lang}_name`,
+          capital: `$${lang}_capital`,
+          images: 1,
+          description: `$${lang}_description`,
+          area: 1,
+          population: 1,
+          gdp: 1,
+          location: 1,
+          googleMapUrl: 1,
+          governor: `$${lang}_governor`,
+          hasPending: 1,
+          status: 1,
+        }
+      : {};
+
 
     try {
-      const query = { district_Id: provincesId };
-      const pendingProvince = await this.provincePndService.findOne(query);
+      const pendingProvince = await this.provincePndService.findOne({ province_id: provincesId }, projectObj);
 
       if (!pendingProvince) {
         return res.status(404).json({ message: 'No pending province found for the provided province_Id' });

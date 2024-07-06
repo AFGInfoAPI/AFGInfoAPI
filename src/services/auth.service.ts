@@ -35,7 +35,7 @@ class AuthService {
     const tokenData = this.createToken(findUser);
     const cookie = this.createCookie(tokenData);
 
-    return { cookie, findUser };
+    return { cookie, findUser: { ...findUser._doc, password: '', token: tokenData.token } };
   }
 
   public async logout(userData: User): Promise<User> {
