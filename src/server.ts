@@ -5,9 +5,21 @@ import UsersRoute from '@routes/users.route';
 import validateEnv from '@utils/validateEnv';
 import ProvinceRoute from './routes/province.route';
 import DistrictRoute from './routes/district.route';
+import TouristicPlace from './routes/touristicplace.route';
+import AirportRoute from './routes/airport.route';
+import HotelRoute from './routes/hotel.route';
 
 validateEnv();
 
-const app = new App([new IndexRoute(), new UsersRoute(), new AuthRoute(), new ProvinceRoute(), new DistrictRoute()]);
+const app = new App([
+  new IndexRoute(),
+  new UsersRoute(),
+  new AuthRoute(),
+  new ProvinceRoute(),
+  new DistrictRoute(),
+  new TouristicPlace(),
+  new AirportRoute(),
+  new HotelRoute(),
+]);
 
 app.listen();
