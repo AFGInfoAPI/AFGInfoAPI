@@ -58,6 +58,20 @@ class BaseService<T extends Document> {
     if (!deletedData) throw new HttpException(404, 'Data not found');
     return deletedData;
   }
+
+  public async checkDuplicate(arrayObject: any[]) {
+    const conditions = arrayObject.map(obj => {
+      const condition = {};
+      for (const key in obj) {
+        condition[key] = obj[key];
+      }
+      return condition;
+    });
+
+    const duplicate = await this.model.findOne({ $or: conditions });
+
+    return duplicate;
+  }
 }
 
 export default BaseService;

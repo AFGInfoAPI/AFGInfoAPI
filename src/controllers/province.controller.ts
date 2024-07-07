@@ -1,3 +1,4 @@
+import { HttpException } from '@/exceptions/HttpException';
 import { ProvincePnd } from '@/interfaces/province.interface';
 import ProvincePndService from '@/services/province.pend.service';
 import ProvinceService from '@/services/province.service';
@@ -244,15 +245,12 @@ class ProvinceController {
 
   public approveProvinceUpdate = async (req: Request, res: Response, next: NextFunction) => {
     const id = req.params.id;
-    const hasApproved = req.body.approved;
+    const hasApproved = JSON.parse(req.body.approved);
 
     try {
       if (hasApproved) {
         // Get the province from the pending collection
         const pndProvince = (await this.provincePndService.findById(id, {})) as ProvincePnd;
-        if (!pndProvince) {
-          return res.status(404).json({ message: 'pndProvince not found' });
-        }
 
         if (pndProvince?.images.length < 1) {
           delete pndProvince.images;
@@ -267,7 +265,9 @@ class ProvinceController {
 
         res.status(200).json({ data: updatedProvince, message: 'approved' });
       } else {
-        await this.provincePndService.delete(id);
+        const deletedPndProvince = await this.provincePndService.delete(id);
+        const province_id = deletedPndProvince.province_id;
+        await this.provinceService.update(province_id, { hasPending: false });
         res.status(200).json({ message: 'rejected' });
       }
     } catch (error) {
@@ -277,7 +277,7 @@ class ProvinceController {
 
   public approveProvince = async (req: Request, res: Response, next: NextFunction) => {
     const id = req.params.id;
-    const hasApproved = req.body.approved;
+    const hasApproved = JSON.parse(req.body.approved);
 
     try {
       if (hasApproved) {
@@ -323,7 +323,6 @@ class ProvinceController {
           status: 1,
         }
       : {};
-
 
     try {
       const pendingProvince = await this.provincePndService.findOne({ province_id: provincesId }, projectObj);
