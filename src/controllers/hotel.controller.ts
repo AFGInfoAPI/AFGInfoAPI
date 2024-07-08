@@ -33,7 +33,6 @@ class HotelPndController {
           phone: 1,
           star: 1,
           rating: 1,
-
           location: 1,
           googleMapUrl: 1,
           hasPending: 1,
@@ -288,17 +287,35 @@ class HotelPndController {
   };
 
   public getPendingHotels = async (req: Request, res: Response, next: NextFunction) => {
-    const hotelId = req.params.hotel_id;
+    const hotelId = req.params.id;
+    const lang = req.query.lang as string;
+
+    const projectObj = lang
+      ? {
+          _id: 1,
+          name: `$${lang}_name`,
+          description: `$${lang}_description`,
+          address: `$${lang}_address`,
+          images: 1,
+          email: 1,
+          phone: 1,
+          star: 1,
+          rating: 1,
+          location: 1,
+          googleMapUrl: 1,
+          hasPending: 1,
+          status: 1,
+        }
+      : {};
 
     try {
-      const query = { hotel_id: hotelId };
-      const pendingHotel = await this.hotelPndService.findOne(query);
+      const getPendingHotel = await this.hotelPndService.findOne({ hotel_id: hotelId }, projectObj);
 
-      if (!pendingHotel) {
+      if (!getPendingHotel) {
         return res.status(404).json({ message: 'No pending hotel found for the provided hotel_id' });
       }
 
-      res.status(200).json({ data: pendingHotel, message: 'findOne' });
+      res.status(200).json({ data: getPendingHotel, message: 'findOne' });
     } catch (error) {
       next(error);
     }

@@ -277,14 +277,29 @@ class AirportController {
   };
 
   public getPendingAirports = async (req: Request, res: Response, next: NextFunction) => {
-    const airportId = req.params.airport_id;
+    const airportId = req.params.id;
+    const lang = req.query.lang as string;
+
+    const projectObj = lang
+      ? {
+          _id: 1,
+          name: `$${lang}_name`,
+          city: `$${lang}_city`,
+          IATA_Code: 1,
+          images: 1,
+          location: 1,
+          googleMapUrl: 1,
+          numbers_of_terminals: 1,
+          hasPending: 1,
+          status: 1,
+        }
+      : {};
 
     try {
-      const query = { airport_id: airportId };
-      const getPendingAirport = await this.airportPndService.findOne(query);
+      const getPendingAirport = await this.airportPndService.findOne({ airport_id: airportId }, projectObj);
 
       if (!getPendingAirport) {
-        return res.status(404).json({ message: 'No pending airport found for the provided airport_Id' });
+        return res.status(404).json({ message: 'No pending airport found for the provided airport_id' });
       }
 
       res.status(200).json({ data: getPendingAirport, message: 'findOne' });

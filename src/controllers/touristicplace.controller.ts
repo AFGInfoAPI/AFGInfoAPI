@@ -278,17 +278,31 @@ class TouristicPlaceController {
   };
 
   public getPendingTouristicPlaces = async (req: Request, res: Response, next: NextFunction) => {
-    const touristicplace_id = req.params.touristic_place_id;
+    const touristicPlaceId = req.params.id;
+    const lang = req.query.lang as string;
+
+    const projectObj = lang
+      ? {
+          _id: 1,
+          name: `$${lang}_name`,
+          images: 1,
+          description: `$${lang}_description`,
+          location: 1,
+          isNationalPark: 1,
+          googleMapUrl: 1,
+          hasPending: 1,
+          status: 1,
+        }
+      : {};
 
     try {
-      const query = { touristic_place_id: touristicplace_id };
-      const pendingTouristicPlaces = await this.touristicPlacePndService.findOne(query);
+      const pendingTouristicPlace = await this.touristicPlacePndService.findOne({ touristicplace_id: touristicPlaceId }, projectObj);
 
-      if (!pendingTouristicPlaces) {
-        return res.status(404).json({ message: 'No pending touristic place found for the provided touristic_place_id' });
+      if (!pendingTouristicPlace) {
+        return res.status(404).json({ message: 'No pending touristicPlace found for the provided touristicplace_id' });
       }
 
-      res.status(200).json({ data: pendingTouristicPlaces, message: 'findOne' });
+      res.status(200).json({ data: pendingTouristicPlace, message: 'findOne' });
     } catch (error) {
       next(error);
     }
