@@ -9,9 +9,9 @@ class AirportPndService extends BaseService<AirportPnd> {
   }
 
   // Add the findOne method
-  public async findOne(query: object): Promise<AirportPnd | null> {
+  public async findOne(queryObject, projectObj): Promise<AirportPnd | null> {
     try {
-      const result = await this.airports.findOne(query).exec();
+      const result = await this.airports.findOne(queryObject, projectObj).exec();
       return result;
     } catch (error) {
       // Log the error or handle it as needed
