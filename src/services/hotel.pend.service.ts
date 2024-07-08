@@ -10,9 +10,9 @@ class HotelPndService extends BaseService<HotelPnd> {
   }
 
   // Add the findOne method
-  public async findOne(query: object): Promise<HotelPnd | null> {
+  public async findOne(queryObject, projectObj): Promise<HotelPnd | null> {
     try {
-      const result = await this.hotels.findOne(query).exec();
+      const result = await this.hotels.findOne(queryObject, projectObj).exec();
       return result;
     } catch (error) {
       // Log the error or handle it as needed
