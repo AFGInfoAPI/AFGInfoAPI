@@ -8,6 +8,7 @@ import DistrictRoute from './routes/district.route';
 import TouristicPlace from './routes/touristicplace.route';
 import AirportRoute from './routes/airport.route';
 import HotelRoute from './routes/hotel.route';
+import ParkRoute from './routes/park.route';
 
 validateEnv();
 
@@ -20,6 +21,7 @@ const app = new App([
   new TouristicPlace(),
   new AirportRoute(),
   new HotelRoute(),
+  new ParkRoute(),
 ]);
 
 app.listen();
