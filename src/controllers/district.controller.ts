@@ -315,7 +315,7 @@ class DistrictController {
       const pendingDistrict = await this.districtPndService.findOne({ province_id: districtId }, projectObj);
 
       if (!pendingDistrict) {
-        return res.status(404).json({ message: 'No pending distr found for the provided district_Id' });
+        return res.status(404).json({ message: 'No pending district found for the provided district_Id' });
       }
 
       res.status(200).json({ data: pendingDistrict, message: 'findOne' });
