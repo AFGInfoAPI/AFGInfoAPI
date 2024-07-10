@@ -191,9 +191,11 @@ class ProvinceController {
   public deleteProvinceImage = async (req: Request, res: Response, next: NextFunction) => {
     const id = req.params.id;
     const image_name = req.params.image_name;
+    console.log(id, '>>>>>>>>>>>>>>>>>>>>');
 
     try {
       const province = await this.provinceService.findById(id, { images: 1, _id: 1 });
+      // return province;
       const images = province.images;
       if (!images.includes(image_name)) {
         return res.status(404).json({ message: 'image not found' });
@@ -331,7 +333,10 @@ class ProvinceController {
         return res.status(404).json({ message: 'No pending province found for the provided province_Id' });
       }
 
-      res.status(200).json({ data: pendingProvince, message: 'findOne' });
+      const pndProvinceImages = attachImages([pendingProvince], ['images']);
+      console.log(pndProvinceImages, '...................>>>>>>>>>>>>>>>>>>>');
+
+      res.status(200).json({ data: pndProvinceImages[0], message: 'findOne' });
     } catch (error) {
       next(error);
     }

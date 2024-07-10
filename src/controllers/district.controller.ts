@@ -5,6 +5,7 @@ import attachImages from '@/utils/helpers/attachImages';
 import { NextFunction, Request, Response } from 'express';
 import { Result, validationResult } from 'express-validator';
 import fs from 'fs';
+import { ObjectId } from 'mongodb';
 
 // Interface for MulterRequest
 interface MulterRequest extends Request {
@@ -21,7 +22,12 @@ class DistrictController {
     const search = req.query.search as string;
     const lang = req.query.lang as string;
     const searchFields = ['en_name', 'dr_name', 'ps_name', 'en_capital', 'dr_capital', 'ps_capital'];
-    const status = req.query.status === 'true' || true ? true : req.query.status === 'false' ? false : undefined;
+    const status = req.query.status === 'true' ? true : req.query.status === 'false' ? false : undefined;
+    const province_id = req.query.province as string;
+    let province_idObj;
+    if (province_id) {
+      province_idObj = new ObjectId(province_id);
+    }
     const projectObj = lang
       ? {
           _id: 1,
@@ -37,9 +43,14 @@ class DistrictController {
           governor: `$${lang}_governor`,
           hasPending: 1,
           status: 1,
+          province_id: 1,
         }
       : {};
-    const { data, meta } = await this.districtService.findAll({ page, limit: per_page, search, status }, searchFields, projectObj);
+    const { data, meta } = await this.districtService.findAll(
+      { page, limit: per_page, search, status, province_id: province_idObj },
+      searchFields,
+      projectObj,
+    );
 
     // Map images to full URL
     const returnDistricts = attachImages(data, ['images']);

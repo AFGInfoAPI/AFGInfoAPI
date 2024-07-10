@@ -76,18 +76,6 @@ const districtSchema = new Schema(
       ref: 'Province',
       required: true,
     },
-    dr_governor: {
-      type: String,
-      required: true,
-    },
-    en_governor: {
-      type: String,
-      required: true,
-    },
-    ps_governor: {
-      type: String,
-      required: true,
-    },
     status: {
       type: Boolean,
       default: false,
