@@ -58,7 +58,7 @@ class AirportRoute {
     this.router.get(`${this.path}/pending/:id`, this.airportController.getPendingAirports);
     this.router.post(`${this.path}/approve_update/:id`, this.airportController.approveAirportUpdate);
     this.router.post(`${this.path}/approve/:id`, this.airportController.approveAirport);
-    this.router.get(`${this.path}/nearby/:id`, nearByValidation, this.airportController.getNearbyAirport);
+    this.router.get(`${this.path}/nearbyAirports`, nearByValidation, this.airportController.getNearbyAirport);
     this.router.get(`${this.path}/:id`, this.airportController.getAirportById);
     this.router.get(`${this.path}`, this.airportController.getAirports);
   }

@@ -300,13 +300,30 @@ class DistrictController {
     }
   };
 
-  // Add the getpandingDistricts method that get the districtId and return the pending district
   public getPendingDistrict = async (req: Request, res: Response, next: NextFunction) => {
-    const districtId = req.params.district_Id;
+    const districtId = req.params.id;
+    const lang = req.query.lang as string;
+
+    const projectObj = lang
+      ? {
+          _id: 1,
+          name: `$${lang}_name`,
+          capital: `$${lang}_capital`,
+          images: 1,
+          description: `$${lang}_description`,
+          area: 1,
+          population: 1,
+          gdp: 1,
+          location: 1,
+          googleMapUrl: 1,
+          governor: `$${lang}_governor`,
+          hasPending: 1,
+          status: 1,
+        }
+      : {};
 
     try {
-      const query = { district_Id: districtId };
-      const pendingDistrict = await this.districtPndService.findOne(query);
+      const pendingDistrict = await this.districtPndService.findOne({ province_id: districtId }, projectObj);
 
       if (!pendingDistrict) {
         return res.status(404).json({ message: 'No pending district found for the provided district_Id' });

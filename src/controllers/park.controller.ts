@@ -1,6 +1,6 @@
-import { AirportPnd } from '@/interfaces/airport.interface';
-import AirportPndService from '@/services/airport.pend.service';
-import AirportService from '@/services/airport.service';
+import { ParkPnd } from '@/interfaces/park.interface';
+import ParkPndService from '@/services/park.pend.service';
+import ParkService from '@/services/park.service';
 import attachImages from '@/utils/helpers/attachImages';
 import { NextFunction, Request, Response } from 'express';
 import { Result, validationResult } from 'express-validator';
@@ -11,11 +11,11 @@ interface MulterRequest extends Request {
   files: Express.Multer.File[];
 }
 
-class AirportController {
-  public airportService = new AirportService();
-  public airportPndService = new AirportPndService();
+class ParkController {
+  public parkService = new ParkService();
+  public parkPndService = new ParkPndService();
 
-  public getAirports = async (req: Request, res: Response) => {
+  getParks = async (req: Request, res: Response) => {
     const page = parseInt(req.query.page as string) || 1;
     const per_page = parseInt(req.query.per_page as string) || 10;
     const search = req.query.search as string;
@@ -26,25 +26,26 @@ class AirportController {
       ? {
           _id: 1,
           name: `$${lang}_name`,
-          city: `$${lang}_city`,
-          IATA_Code: 1,
           images: 1,
           location: 1,
           googleMapUrl: 1,
-          numbers_of_terminals: 1,
           hasPending: 1,
           status: 1,
         }
       : {};
-    const { data, meta } = await this.airportService.findAll({ page, limit: per_page, search, status }, searchFields, projectObj);
+    const { data, meta } = await this.parkService.findAll({ page, limit: per_page, search, status }, searchFields, projectObj);
 
-    //Map images to full URL
-    const returnAirports = attachImages(data, ['images']);
+    // Map images to full URL
+    const returnParl = attachImages(data, ['images']);
 
-    res.status(200).json({ data: returnAirports, meta, message: 'findAll' });
+    res.status(200).json({
+      data: returnParl,
+      meta,
+      message: 'findAll',
+    });
   };
 
-  public createAirport = async (req: MulterRequest, res: Response, next: NextFunction) => {
+  public createPark = async (req: MulterRequest, res: Response, next: NextFunction) => {
     try {
       const result: Result = validationResult(req);
       if (!result.isEmpty()) {
@@ -55,7 +56,7 @@ class AirportController {
         return res.status(400).json({ errors: errorObject });
       }
 
-      const airportData = req.body;
+      const parkData = req.body;
       const images = Object.keys(req.files).reduce((acc, key) => {
         if (key.startsWith('images[') && key.endsWith(']')) {
           acc.push(req.files[key][0].filename);
@@ -65,42 +66,39 @@ class AirportController {
 
       const location = {
         type: 'Point',
-        coordinates: [Number(airportData.lng), Number(airportData.lat)],
+        coordinates: [Number(parkData.lng), Number(parkData.lat)],
       };
-      const district = await this.airportService.create({ ...airportData, images, location });
-      res.status(201).json({ data: district, message: 'created' });
+      const park = await this.parkService.create({ ...parkData, images, location });
+      res.status(201).json({ data: park, message: 'created' });
     } catch (error) {
       next(error);
     }
   };
 
-  public getAirportById = async (req: Request, res: Response, next: NextFunction) => {
+  public getParkById = async (req: Request, res: Response, next: NextFunction) => {
     const id = req.params.id;
     const lang = req.query.lang as string;
     const projectObj = lang
       ? {
           _id: 1,
           name: `$${lang}_name`,
-          city: `$${lang}_city`,
-          IATA_Code: 1,
           images: 1,
           location: 1,
           googleMapUrl: 1,
-          numbers_of_terminals: 1,
           hasPending: 1,
           status: 1,
         }
       : {};
 
     try {
-      const data = await this.airportService.findById(id, projectObj);
+      const data = await this.parkService.findById(id, projectObj);
       res.status(200).json({ data, message: 'findOne' });
     } catch (error) {
       next(error);
     }
   };
 
-  public updateAirport = async (req: MulterRequest, res: Response, next: NextFunction) => {
+  public updatePark = async (req: MulterRequest, res: Response, next: NextFunction) => {
     const id = req.params.id;
 
     try {
@@ -113,7 +111,7 @@ class AirportController {
         return res.status(400).json({ errors: errorObject });
       }
 
-      const airportData = req.body;
+      const parkData = req.body;
       const images = Object.keys(req.files).reduce((acc, key) => {
         if (key.startsWith('images[') && key.endsWith(']')) {
           acc.push(req.files[key][0].filename);
@@ -123,54 +121,54 @@ class AirportController {
 
       const location = {
         type: 'Point',
-        coordinates: [Number(airportData.lng), Number(airportData.lat)],
+        coordinates: [Number(parkData.lng), Number(parkData.lat)],
       };
-      const airport = await this.airportService.findById(id);
-      if (!airport) {
-        return res.status(404).json({ message: ' airport not found' });
+      const park = await this.parkService.findById(id);
+      if (!park) {
+        return res.status(404).json({ message: ' park not found' });
       }
 
-      const AirportPnd = await this.airportPndService.create({ ...airportData, images, location, airport_id: id });
-      await this.airportService.update(id, { hasPending: true });
-      res.status(200).json({ data: AirportPnd, message: 'updated' });
+      const pndPark = await this.parkPndService.create({ ...parkData, images, location, park_id: id });
+      await this.parkService.update(id, { hasPending: true });
+      res.status(200).json({ data: pndPark, message: 'updated' });
     } catch (error) {
       next(error);
     }
   };
 
-  public updateAirportImages = async (req: MulterRequest, res: Response, next: NextFunction) => {
+  public updateParkImages = async (req: MulterRequest, res: Response, next: NextFunction) => {
     const id = req.params.id;
 
     try {
-      const airport = (await this.airportService.findById(id, { images: 1, _id: 1 })) as { images: string[] };
-      const images = airport.images;
+      const park = (await this.parkService.findById(id, { images: 1, _id: 1 })) as { images: string[] };
+      const images = park.images;
       const newImages = Object.keys(req.files).reduce((acc, key) => {
         if (key.startsWith('images[') && key.endsWith(']')) {
           acc.push(req.files[key][0].filename);
         }
         return acc;
       }, []);
-      airport.images = [...images, ...newImages];
-      const response = await this.airportService.update(id, airport);
+      park.images = [...images, ...newImages];
+      const response = await this.parkService.update(id, park);
       res.status(200).json({ data: response, message: 'updated' });
     } catch (error) {
       next(error);
     }
   };
 
-  public deleteAirportImages = async (req: Request, res: Response, next: NextFunction) => {
+  public deleteParkImage = async (req: Request, res: Response, next: NextFunction) => {
     const id = req.params.id;
     const image_name = req.params.image_name;
 
     try {
-      const airport = await this.airportService.findById(id, { images: 1, _id: 1 });
-      const images = airport.images;
+      const park = await this.parkService.findById(id, { images: 1, _id: 1 });
+      const images = park.images;
       if (!images.includes(image_name)) {
         return res.status(404).json({ message: 'Image not found' });
       }
       const newImages = images.filter(image => image !== image_name);
-      airport.images = newImages;
-      const response = await this.airportService.update(id, airport);
+      park.images = newImages;
+      const response = await this.parkService.update(id, park);
 
       // Delete image from uploads folder
       const path = `uploads/${image_name}`;
@@ -185,18 +183,18 @@ class AirportController {
     }
   };
 
-  public deleteAirport = async (req: Request, res: Response, next: NextFunction) => {
+  public deletePark = async (req: Request, res: Response, next: NextFunction) => {
     const id = req.params.id;
 
     try {
-      const airport = await this.airportService.delete(id);
-      res.status(200).json({ data: airport, message: 'deleted' });
+      const park = await this.parkService.delete(id);
+      res.status(200).json({ data: park, message: 'deleted' });
     } catch (error) {
       next(error);
     }
   };
 
-  public getNearbyAirport = async (req: Request, res: Response, next: NextFunction) => {
+  public getNearbyParks = async (req: Request, res: Response, next: NextFunction) => {
     const result: Result = validationResult(req);
 
     if (!result.isEmpty()) {
@@ -214,35 +212,38 @@ class AirportController {
     }
 
     try {
-      const nearbyProvinces = await this.airportService.getNearbyAirports(parseFloat(lat as string), parseFloat(lng as string));
+      const getNearbyParks = await this.parkService.getNearbyParks(parseFloat(lat as string), parseFloat(lng as string));
 
       // Map images to full URL
-      const returnAirports = attachImages(nearbyProvinces, ['images']);
-      res.status(200).json({ data: returnAirports, message: 'findNearby' });
+      const returnPark = attachImages(getNearbyParks, ['images']);
+      res.status(200).json({ data: returnPark, message: 'findNearby' });
     } catch (error) {
       next(error);
     }
   };
 
-  public approveAirportUpdate = async (req: Request, res: Response, next: NextFunction) => {
+  public approveParkUpdate = async (req: Request, res: Response, next: NextFunction) => {
     const id = req.params.id;
     const hasApproved = req.body.approved;
 
     try {
       if (hasApproved) {
-        const pndAirport = (await this.airportPndService.findById(id, {})) as AirportPnd;
-        if (!pndAirport) {
-          return res.status(404).json({ message: 'No pending district found' });
+        //get the pending district
+        const pndPark = (await this.parkPndService.findById(id, {})) as ParkPnd;
+        if (!pndPark) {
+          return res.status(404).json({ message: 'No pending park found' });
         }
 
-        delete pndAirport._id;
-        const updateAirport = await this.airportService.update(pndAirport.airport_id, { ...pndAirport, hasPending: false });
+        //delete the _id to avoid id duplication
+        delete pndPark._id;
+        const updatePark = await this.parkService.update(pndPark.park_id, { ...pndPark, hasPending: false });
 
-        await this.airportPndService.delete(id);
+        //delete the pending district after approval
+        await this.parkPndService.delete(id);
 
-        res.status(200).json({ data: updateAirport, message: 'approved' });
+        res.status(200).json({ data: updatePark, message: 'approved' });
       } else {
-        await this.airportPndService.delete(id);
+        await this.parkPndService.delete(id);
         res.status(200).json({ message: 'rejected' });
       }
     } catch (error) {
@@ -250,25 +251,25 @@ class AirportController {
     }
   };
 
-  public approveAirport = async (req: Request, res: Response, next: NextFunction) => {
+  public approvePark = async (req: Request, res: Response, next: NextFunction) => {
     const id = req.params.id;
     const hasApproved = req.body.approved;
 
     try {
       if (hasApproved) {
-        const airport = await this.airportService.findById(id, {});
-        if (!airport) {
-          return res.status(404).json({ message: 'No pending airport found' });
+        const park = await this.parkService.findById(id, {});
+        if (!park) {
+          return res.status(404).json({ message: 'No pending park found' });
         }
 
-        if (!airport?.status) {
-          const approvedairport = await this.airportService.update(id, { ...airport, status: true });
-          res.status(200).json({ data: approvedairport, message: 'approved' });
-        } else if (airport.status) {
-          res.status(400).json({ message: 'airport is already approved' });
+        if (!park?.status) {
+          const approvedpark = await this.parkService.update(id, { ...park, status: true });
+          res.status(200).json({ data: approvedpark, message: 'approved' });
+        } else if (park.status) {
+          res.status(400).json({ message: 'park is already approved' });
         }
       } else {
-        await this.airportService.delete(id);
+        await this.parkService.delete(id);
         res.status(200).json({ message: 'rejected' });
       }
     } catch (error) {
@@ -276,36 +277,34 @@ class AirportController {
     }
   };
 
-  public getPendingAirports = async (req: Request, res: Response, next: NextFunction) => {
-    const airportId = req.params.id;
+  public getPendingParks = async (req: Request, res: Response, next: NextFunction) => {
+    const parkId = req.params.id;
     const lang = req.query.lang as string;
 
     const projectObj = lang
       ? {
           _id: 1,
           name: `$${lang}_name`,
-          city: `$${lang}_city`,
-          IATA_Code: 1,
           images: 1,
           location: 1,
           googleMapUrl: 1,
-          numbers_of_terminals: 1,
           hasPending: 1,
           status: 1,
         }
       : {};
 
     try {
-      const getPendingAirport = await this.airportPndService.findOne({ airport_id: airportId }, projectObj);
+      const pendingPark = await this.parkPndService.findOne({ park_id: parkId }, projectObj);
 
-      if (!getPendingAirport) {
-        return res.status(404).json({ message: 'No pending airport found for the provided airport_id' });
+      if (!pendingPark) {
+        return res.status(404).json({ message: 'No pending park found for the provided park_Id' });
       }
 
-      res.status(200).json({ data: getPendingAirport, message: 'findOne' });
+      res.status(200).json({ data: pendingPark, message: 'findOne' });
     } catch (error) {
       next(error);
     }
   };
 }
-export default AirportController;
+
+export default ParkController;
