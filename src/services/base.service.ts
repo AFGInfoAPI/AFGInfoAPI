@@ -74,6 +74,17 @@ class BaseService<T extends Document> {
 
     return duplicate;
   }
+
+  public async findOne(queryObject, projectObj): Promise<T> {
+    try {
+      const result = await this.model.findOne(queryObject, projectObj).lean();
+      return result as T;
+    } catch (error) {
+      // Log the error or handle it as needed
+      console.error('Error finding document:', error);
+      throw error;
+    }
+  }
 }
 
 export default BaseService;

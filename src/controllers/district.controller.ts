@@ -23,7 +23,7 @@ class DistrictController {
     const lang = req.query.lang as string;
     const searchFields = ['en_name', 'dr_name', 'ps_name', 'en_capital', 'dr_capital', 'ps_capital'];
     const status = req.query.status === 'true' ? true : req.query.status === 'false' ? false : undefined;
-    const province_id = req.query.province_id as string;
+    const province_id = req.query.province as string;
     const projectObj = lang
       ? {
           _id: 1,
@@ -109,7 +109,8 @@ class DistrictController {
 
     try {
       const data = await this.districtService.findById(id, projectObj);
-      res.status(200).json({ data, message: 'findOne' });
+      const withImages = attachImages([data], ['images']);
+      res.status(200).json({ data: withImages[0], message: 'findOne' });
     } catch (error) {
       next(error);
     }
@@ -323,7 +324,9 @@ class DistrictController {
         return res.status(404).json({ message: 'No pending district found for the provided district_Id' });
       }
 
-      res.status(200).json({ data: pendingDistrict, message: 'findOne' });
+      const withImages = attachImages([pendingDistrict], ['images']);
+
+      res.status(200).json({ data: withImages[0], message: 'findOne' });
     } catch (error) {
       next(error);
     }
