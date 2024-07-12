@@ -1,4 +1,4 @@
-import { Document } from 'mongoose';
+import { Document, ObjectId } from 'mongoose';
 
 export interface District extends Document {
   _id: string;
@@ -13,6 +13,7 @@ export interface District extends Document {
   description: string;
   status?: boolean;
   images: string[];
+  province_id: ObjectId;
 }
 
 export interface DistrictPnd extends Document {

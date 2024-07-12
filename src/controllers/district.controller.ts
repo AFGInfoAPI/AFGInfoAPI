@@ -24,10 +24,6 @@ class DistrictController {
     const searchFields = ['en_name', 'dr_name', 'ps_name', 'en_capital', 'dr_capital', 'ps_capital'];
     const status = req.query.status === 'true' ? true : req.query.status === 'false' ? false : undefined;
     const province_id = req.query.province as string;
-    let province_idObj;
-    if (province_id) {
-      province_idObj = new ObjectId(province_id);
-    }
     const projectObj = lang
       ? {
           _id: 1,
@@ -46,14 +42,12 @@ class DistrictController {
           province_id: 1,
         }
       : {};
-    const { data, meta } = await this.districtService.findAll(
-      { page, limit: per_page, search, status, province_id: province_idObj },
-      searchFields,
-      projectObj,
-    );
+    const { data, meta } = await this.districtService.findAll({ page, limit: per_page, search, status }, searchFields, projectObj);
+
+    const filtered = province_id ? data.filter(district => district.province_id.toString() === province_id) : data;
 
     // Map images to full URL
-    const returnDistricts = attachImages(data, ['images']);
+    const returnDistricts = attachImages(filtered, ['images']);
 
     res.status(200).json({
       data: returnDistricts,
@@ -115,7 +109,8 @@ class DistrictController {
 
     try {
       const data = await this.districtService.findById(id, projectObj);
-      res.status(200).json({ data, message: 'findOne' });
+      const withImages = attachImages([data], ['images']);
+      res.status(200).json({ data: withImages[0], message: 'findOne' });
     } catch (error) {
       next(error);
     }
@@ -329,7 +324,9 @@ class DistrictController {
         return res.status(404).json({ message: 'No pending district found for the provided district_Id' });
       }
 
-      res.status(200).json({ data: pendingDistrict, message: 'findOne' });
+      const withImages = attachImages([pendingDistrict], ['images']);
+
+      res.status(200).json({ data: withImages[0], message: 'findOne' });
     } catch (error) {
       next(error);
     }
