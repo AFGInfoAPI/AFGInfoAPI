@@ -12,8 +12,8 @@ class DistrictPndService extends BaseService<DistrictPnd> {
   // Add the findOne method
   public async findOne(queryObject, projectObj): Promise<DistrictPnd | null> {
     try {
-      const result = await this.districts.findOne(queryObject, projectObj).exec();
-      return result;
+      const result = await this.districts.findOne(queryObject, projectObj).lean();
+      return result as DistrictPnd;
     } catch (error) {
       // Log the error or handle it as needed
       console.error('Error finding document:', error);
