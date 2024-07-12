@@ -21,7 +21,8 @@ class TouristicPlaceController {
     const search = req.query.search as string;
     const lang = req.query.lang as string;
     const searchFields = ['en_name', 'dr_name', 'ps_name'];
-    const status = req.query.status === 'true' || true ? true : req.query.status === 'false' ? false : undefined;
+    const status = req.query.status === 'true' ? true : req.query.status === 'false' ? false : undefined;
+    const hasPending = req.query.hasPending === 'true' ? true : req.query.hasPending === 'false' ? false : undefined;
     const projectObj = lang
       ? {
           _id: 1,
@@ -35,7 +36,7 @@ class TouristicPlaceController {
           status: 1,
         }
       : {};
-    const { data, meta } = await this.touristicPlaceService.findAll({ page, limit: per_page, search, status }, searchFields, projectObj);
+    const { data, meta } = await this.touristicPlaceService.findAll({ page, limit: per_page, search, status, hasPending }, searchFields, projectObj);
 
     // Map images to full URL
     const returnTouristicPlaces = attachImages(data, ['images']);
@@ -91,7 +92,8 @@ class TouristicPlaceController {
 
     try {
       const touristicplace = await this.touristicPlaceService.findById(id, projectObj);
-      return res.status(200).json({ data: touristicplace, message: 'findOne' });
+      const withImages = attachImages([touristicplace], ['images']);
+      return res.status(200).json({ data: withImages[0], message: 'findOne' });
     } catch (error) {
       next(error);
     }
@@ -169,7 +171,7 @@ class TouristicPlaceController {
 
   public deleteTouristicPlaceImage = async (req: Request, res: Response, next: NextFunction) => {
     const id = req.params.id;
-    const image = req.params.image;
+    const image = req.params.image_name;
 
     try {
       const touristicplace = await this.touristicPlaceService.findById(id, { images: 1, _id: 1 });
@@ -180,7 +182,6 @@ class TouristicPlaceController {
       const newImages = images.filter(img => img !== image);
       touristicplace.images = newImages;
       const response = await this.touristicPlaceService.update(id, touristicplace);
-
       // Delete image from server
       const path = `./uploads/${image}`;
       fs.unlink(path, err => {
@@ -253,7 +254,7 @@ class TouristicPlaceController {
 
   public approveTouristicPlace = async (req: Request, res: Response, next: NextFunction) => {
     const id = req.params.id;
-    const hasApproved = req.body.approved;
+    const hasApproved = JSON.parse(req.body.approved);
 
     try {
       if (hasApproved) {

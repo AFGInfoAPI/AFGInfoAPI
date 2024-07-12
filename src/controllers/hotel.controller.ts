@@ -21,7 +21,8 @@ class HotelPndController {
     const search = req.query.search as string;
     const lang = req.query.lang as string;
     const searchFields = ['en_name', 'dr_name', 'ps_name', 'en_capital', 'dr_capital', 'ps_capital'];
-    const status = req.query.status === 'true' || true ? true : req.query.status === 'false' ? false : undefined;
+    const status = req.query.status === 'true' ? true : req.query.status === 'false' ? false : undefined;
+    const hasPending = req.query.hasPending === 'true' ? true : req.query.hasPending === 'false' ? false : undefined;
     const projectObj = lang
       ? {
           _id: 1,
@@ -39,7 +40,7 @@ class HotelPndController {
           status: 1,
         }
       : {};
-    const { data, meta } = await this.hotelService.findAll({ page, limit: per_page, search, status }, searchFields, projectObj);
+    const { data, meta } = await this.hotelService.findAll({ page, limit: per_page, search, status, hasPending }, searchFields, projectObj);
 
     // Map images to full URL
     const returnHotel = attachImages(data, ['images']);
@@ -104,7 +105,8 @@ class HotelPndController {
 
     try {
       const hotel = await this.hotelService.findById(id, projectObj);
-      res.status(200).json({ data: hotel, message: 'findOne' });
+      const withImage = attachImages([hotel], ['images']);
+      res.status(200).json({ data: withImage[0], message: 'findOne' });
     } catch (error) {
       next(error);
     }
@@ -236,7 +238,7 @@ class HotelPndController {
 
   public approveHotel = async (req: Request, res: Response, next: NextFunction) => {
     const id = req.params.id;
-    const hasApproved = req.body.approved;
+    const hasApproved = JSON.parse(req.body.approved);
 
     try {
       if (hasApproved) {
@@ -311,11 +313,13 @@ class HotelPndController {
     try {
       const getPendingHotel = await this.hotelPndService.findOne({ hotel_id: hotelId }, projectObj);
 
+      const withImage = attachImages([getPendingHotel], ['images']);
+
       if (!getPendingHotel) {
         return res.status(404).json({ message: 'No pending hotel found for the provided hotel_id' });
       }
 
-      res.status(200).json({ data: getPendingHotel, message: 'findOne' });
+      res.status(200).json({ data: withImage[0], message: 'findOne' });
     } catch (error) {
       next(error);
     }

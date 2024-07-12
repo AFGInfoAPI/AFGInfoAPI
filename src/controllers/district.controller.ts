@@ -24,6 +24,7 @@ class DistrictController {
     const searchFields = ['en_name', 'dr_name', 'ps_name', 'en_capital', 'dr_capital', 'ps_capital'];
     const status = req.query.status === 'true' ? true : req.query.status === 'false' ? false : undefined;
     const province_id = req.query.province as string;
+    const hasPending = req.query.hasPending === 'true' ? true : req.query.hasPending === 'false' ? false : undefined;
     const projectObj = lang
       ? {
           _id: 1,
@@ -42,7 +43,7 @@ class DistrictController {
           province_id: 1,
         }
       : {};
-    const { data, meta } = await this.districtService.findAll({ page, limit: per_page, search, status }, searchFields, projectObj);
+    const { data, meta } = await this.districtService.findAll({ page, limit: per_page, search, status, hasPending }, searchFields, projectObj);
 
     const filtered = province_id ? data.filter(district => district.province_id.toString() === province_id) : data;
 
@@ -271,7 +272,7 @@ class DistrictController {
 
   public approveDistrict = async (req: Request, res: Response, next: NextFunction) => {
     const id = req.params.id;
-    const hasApproved = req.body.approved;
+    const hasApproved = JSON.parse(req.body.approved);
 
     try {
       if (hasApproved) {
