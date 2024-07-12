@@ -13,6 +13,8 @@ class BaseService<T extends Document> {
   public async findAll(filters = {}, searchFields = [], projectObj = {}): Promise<{ data: T[]; meta: any }> {
     const query = this.model.find().lean();
 
+    // const finQuery = query.where(filters);
+
     const features = new APIFeatures(query, { ...filters }, searchFields).filter().sort().limitFields().paginate().projectFields(projectObj); // Add projection fields
 
     const pipeline = features.getPipeline();
@@ -57,6 +59,20 @@ class BaseService<T extends Document> {
     const deletedData = await this.model.findByIdAndDelete(id);
     if (!deletedData) throw new HttpException(404, 'Data not found');
     return deletedData;
+  }
+
+  public async checkDuplicate(arrayObject: any[]) {
+    const conditions = arrayObject.map(obj => {
+      const condition = {};
+      for (const key in obj) {
+        condition[key] = obj[key];
+      }
+      return condition;
+    });
+
+    const duplicate = await this.model.findOne({ $or: conditions });
+
+    return duplicate;
   }
 }
 
