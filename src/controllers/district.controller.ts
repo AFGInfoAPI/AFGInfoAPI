@@ -23,11 +23,7 @@ class DistrictController {
     const lang = req.query.lang as string;
     const searchFields = ['en_name', 'dr_name', 'ps_name', 'en_capital', 'dr_capital', 'ps_capital'];
     const status = req.query.status === 'true' ? true : req.query.status === 'false' ? false : undefined;
-    const province_id = req.query.province as string;
-    let province_idObj;
-    if (province_id) {
-      province_idObj = new ObjectId(province_id);
-    }
+    const province_id = req.query.province_id as string;
     const projectObj = lang
       ? {
           _id: 1,
@@ -46,14 +42,12 @@ class DistrictController {
           province_id: 1,
         }
       : {};
-    const { data, meta } = await this.districtService.findAll(
-      { page, limit: per_page, search, status, province_id: province_idObj },
-      searchFields,
-      projectObj,
-    );
+    const { data, meta } = await this.districtService.findAll({ page, limit: per_page, search, status }, searchFields, projectObj);
+
+    const filtered = province_id ? data.filter(district => district.province_id.toString() === province_id) : data;
 
     // Map images to full URL
-    const returnDistricts = attachImages(data, ['images']);
+    const returnDistricts = attachImages(filtered, ['images']);
 
     res.status(200).json({
       data: returnDistricts,
