@@ -96,7 +96,9 @@ class AirportController {
 
     try {
       const data = await this.airportService.findById(id, projectObj);
-      res.status(200).json({ data, message: 'findOne' });
+
+      const withImages = attachImages([data], ['images']);
+      res.status(200).json({ data: withImages[0], message: 'findOne' });
     } catch (error) {
       next(error);
     }
