@@ -15,6 +15,7 @@ export interface Hospital extends Document {
   googleMapUrl: string;
   status?: boolean;
   images: string[];
+  province_id: string;
 }
 
 export interface HospitalPnd extends Document {

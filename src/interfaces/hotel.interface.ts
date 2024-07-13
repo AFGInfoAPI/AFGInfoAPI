@@ -15,6 +15,7 @@ export interface Hotel extends Document {
   lat: number;
   lng: number;
   googleMapUrl: string;
+  province_id: string;
 }
 
 export interface HotelPnd extends Document {

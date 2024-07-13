@@ -22,8 +22,12 @@ class AirportController {
     const search = req.query.search as string;
     const lang = req.query.lang as string;
     const searchFields = ['en_name', 'dr_name', 'ps_name'];
-
-    const status = req.query.status === 'true' ? true : req.query.status === 'false' ? false : undefined;
+    let status;
+    if (req.query.status === 'true') {
+      status = true;
+    } else if (req.query.status === 'false') {
+      status = false;
+    }
     const province_id = req.query.province as string;
     const hasPending = req.query.hasPending === 'true' ? true : req.query.hasPending === 'false' ? false : undefined;
 
@@ -44,10 +48,9 @@ class AirportController {
       : {};
 
     const { data, meta } = await this.airportService.findAll({ page, limit: per_page, search, status, hasPending }, searchFields, projectObj);
-
-
+    const filtered = province_id ? data.filter(airport => airport.province_id.toString() === province_id) : data;
     //Map images to full URL
-    const returnAirports = attachImages(data, ['images']);
+    const returnAirports = attachImages(filtered, ['images']);
 
     res.status(200).json({ data: returnAirports, meta, message: 'findAll' });
   };
