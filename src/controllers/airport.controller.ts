@@ -38,7 +38,7 @@ class AirportController {
           status: 1,
         }
       : {};
-    const { data, meta } = await this.airportService.findAll({ page, limit: per_page, search, status }, searchFields, projectObj);
+    const { data, meta } = await this.airportService.findAll({ page, limit: per_page, search, status, hasPending }, searchFields, projectObj);
 
     //Map images to full URL
     const returnAirports = attachImages(data, ['images']);
