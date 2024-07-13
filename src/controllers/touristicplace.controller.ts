@@ -49,7 +49,7 @@ class TouristicPlaceController {
     const { data, meta } = await this.touristicPlaceService.findAll({ page, limit: per_page, search, status, hasPending }, searchFields, projectObj);
     const filtered = province_id ? data.filter(touristicPlace => touristicPlace.province_id.toString() === province_id) : data;
     // Map images to full URL
-    const returnTouristicPlaces = attachImages(data, ['images']);
+    const returnTouristicPlaces = attachImages(filtered, ['images']);
 
     return res.status(200).json({ data: returnTouristicPlaces, meta, message: 'findAll' });
   };

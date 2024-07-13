@@ -47,7 +47,7 @@ class ParkController {
       searchFields,
       projectObj,
     );
-    const filtered = data.filter((park: any) => park.province_id.toString() === province_id);
+    const filtered = province_id ? data.filter((park: any) => park.province_id.toString() === province_id) : data;
     // Map images to full URL
     const returnParl = attachImages(filtered, ['images']);
 
