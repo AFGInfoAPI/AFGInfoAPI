@@ -37,12 +37,13 @@ export const createAirportValidation = [
   check('en_city').bail().notEmpty().withMessage('English city is required').bail().isString().withMessage('City must be a string'),
   check('dr_city').bail().notEmpty().withMessage('Dari city is required').bail().isString().withMessage('City must be a string'),
   check('ps_city').bail().notEmpty().withMessage('Pashto city is required').bail().isString().withMessage('City must be a string'),
-  check('IATA_Code').bail().notEmpty().withMessage('IATA code is required').bail().isString().withMessage('IATA code must be a string'),
-  check('numbers_of_terminals')
+  check('iata_code').bail().notEmpty().withMessage('IATA code is required').bail().isString().withMessage('IATA code must be a string'),
+  check('number_of_terminals')
     .bail()
     .notEmpty()
     .withMessage('Number of terminals is required')
     .bail()
     .isNumeric()
     .withMessage('Number of terminals must be a number'),
+  check('province_id').bail().notEmpty().withMessage('Province is required').bail().isMongoId().withMessage('Province must be a valid id'),
 ];
