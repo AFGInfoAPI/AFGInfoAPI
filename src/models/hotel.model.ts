@@ -55,10 +55,8 @@ const hotelSchema = new Schema(
     rating: {
       type: Number,
       required: false,
-    },
-    star: {
-      type: Number,
-      required: false,
+      min: 0,
+      max: 5,
     },
     images: {
       type: [String],
@@ -83,6 +81,10 @@ const hotelSchema = new Schema(
         type: [Number],
         required: true,
       },
+    },
+    googleMapUrl: {
+      type: String,
+      required: false,
     },
     hasPending: {
       type: Boolean,

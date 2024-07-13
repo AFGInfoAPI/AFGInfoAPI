@@ -22,23 +22,17 @@ class AirportController {
     const search = req.query.search as string;
     const lang = req.query.lang as string;
     const searchFields = ['en_name', 'dr_name', 'ps_name'];
-    let status;
-    if (req.query.status === 'true') {
-      status = true;
-    } else if (req.query.status === 'false') {
-      status = false;
-    }
+
+    const status = req.query.status === 'true' ? true : req.query.status === 'false' ? false : undefined;
     const province_id = req.query.province as string;
-    let province_idObj;
-    if (province_id) {
-      province_idObj = new ObjectId(province_id);
-    }
+    const hasPending = req.query.hasPending === 'true' ? true : req.query.hasPending === 'false' ? false : undefined;
+
     const projectObj = lang
       ? {
           _id: 1,
           name: `$${lang}_name`,
           city: `$${lang}_city`,
-          IATA_Code: 1,
+          iata_code: 1,
           images: 1,
           location: 1,
           googleMapUrl: 1,
@@ -48,11 +42,9 @@ class AirportController {
           province_id: 1,
         }
       : {};
-    const { data, meta } = await this.airportService.findAll(
-      { page, limit: per_page, search, status, province_id: province_idObj },
-      searchFields,
-      projectObj,
-    );
+
+    const { data, meta } = await this.airportService.findAll({ page, limit: per_page, search, status, hasPending }, searchFields, projectObj);
+
 
     //Map images to full URL
     const returnAirports = attachImages(data, ['images']);
@@ -110,6 +102,7 @@ class AirportController {
 
     try {
       const data = await this.airportService.findById(id, projectObj);
+
       const imageAttached = attachImages([data], ['images']);
       res.status(200).json({ data: imageAttached[0], message: 'findOne' });
     } catch (error) {

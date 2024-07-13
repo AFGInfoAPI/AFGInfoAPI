@@ -9,17 +9,6 @@ class HotelPndService extends BaseService<HotelPnd> {
     super(HotelPndModel);
   }
 
-  // Add the findOne method
-  public async findOne(queryObject, projectObj): Promise<HotelPnd | null> {
-    try {
-      const result = await this.hotels.findOne(queryObject, projectObj).lean();
-      return result as HotelPnd;
-    } catch (error) {
-      // Log the error or handle it as needed
-      console.error('Error finding document:', error);
-      throw error;
-    }
-  }
 }
 
 export default HotelPndService;

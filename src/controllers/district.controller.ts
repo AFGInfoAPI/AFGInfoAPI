@@ -29,6 +29,7 @@ class DistrictController {
       status = false;
     }
     const province_id = req.query.province as string;
+    const hasPending = req.query.hasPending === 'true' ? true : req.query.hasPending === 'false' ? false : undefined;
     const projectObj = lang
       ? {
           _id: 1,
@@ -47,7 +48,7 @@ class DistrictController {
           province_id: 1,
         }
       : {};
-    const { data, meta } = await this.districtService.findAll({ page, limit: per_page, search, status }, searchFields, projectObj);
+    const { data, meta } = await this.districtService.findAll({ page, limit: per_page, search, status, hasPending }, searchFields, projectObj);
 
     const filtered = province_id ? data.filter(district => district.province_id.toString() === province_id) : data;
 

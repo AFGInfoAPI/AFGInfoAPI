@@ -28,7 +28,7 @@ const airportSchema = new Schema(
       type: String,
       required: true,
     },
-    IATA_Code: {
+    iata_code: {
       type: String,
       required: true,
     },
@@ -36,7 +36,7 @@ const airportSchema = new Schema(
       type: String,
       required: true,
     },
-    numbers_of_terminals: {
+    number_of_terminals: {
       type: Number,
       required: true,
     },

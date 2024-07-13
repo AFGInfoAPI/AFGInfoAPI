@@ -22,6 +22,7 @@ class ProvinceController {
     const search = req.query.search as string;
     const lang = req.query.lang as string;
     const searchFields = ['en_name', 'dr_name', 'ps_name', 'en_capital', 'dr_capital', 'ps_capital'];
+    const hasPending = req.query.hasPending === 'true' ? true : req.query.hasPending === 'false' ? false : undefined;
     let status;
     if (req.query.status === 'true') {
       status = true;
@@ -46,7 +47,7 @@ class ProvinceController {
           status: 1,
         }
       : {};
-    const { data, meta } = await this.provinceService.findAll({ page, limit: per_page, search, status }, searchFields, projectObj);
+    const { data, meta } = await this.provinceService.findAll({ page, limit: per_page, search, status, hasPending }, searchFields, projectObj);
 
     // Map images to full URL
     const returnProvinces = attachImages(data, ['images']);

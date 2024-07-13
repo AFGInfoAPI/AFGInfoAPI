@@ -112,8 +112,17 @@ export const createHotelValidation = [
     .bail()
     .isLength({ min: 3 })
     .withMessage('Website must be at least 3'),
-  check('rating').bail().notEmpty().withMessage('Rating is required').bail().isNumeric().withMessage('Rating must be a number'),
-  check('star').bail().notEmpty().withMessage('Star is required').bail().isNumeric().withMessage('Star must be a number'),
+  check('rating')
+    .bail()
+    .notEmpty()
+    .withMessage('Rating is required')
+    .bail()
+    .isNumeric()
+    .withMessage('Rating must be a number')
+    .custom(value => value >= 0 && value <= 5)
+    .withMessage('Rating must be between 0 and 5'),
   check('lat').bail().notEmpty().withMessage('Latitude is required').bail().isNumeric().withMessage('Latitude must be a number'),
   check('lng').bail().notEmpty().withMessage('Longitude is required').bail().isNumeric().withMessage('Longitude must be a number'),
+  check('province_id').bail().notEmpty().withMessage('Province is required').bail().isMongoId().withMessage('Province must be a valid ID'),
+  check('googleMapUrl').bail().isURL().withMessage('Google Map URL must be a valid URL'),
 ];

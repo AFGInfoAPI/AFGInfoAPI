@@ -21,18 +21,11 @@ class HotelPndController {
     const per_page = parseInt(req.query.per_page as string) || 10;
     const search = req.query.search as string;
     const lang = req.query.lang as string;
-    const searchFields = ['en_name', 'dr_name', 'ps_name'];
-    let status;
-    if (req.query.status === 'true') {
-      status = true;
-    } else if (req.query.status === 'false') {
-      status = false;
-    }
-    const province_id = req.query.province as string;
-    let province_idObj;
-    if (province_id) {
-      province_idObj = new ObjectId(province_id);
-    }
+
+    const searchFields = ['en_name', 'dr_name', 'ps_name', 'en_capital', 'dr_capital', 'ps_capital'];
+    const status = req.query.status === 'true' ? true : req.query.status === 'false' ? false : undefined;
+    const hasPending = req.query.hasPending === 'true' ? true : req.query.hasPending === 'false' ? false : undefined;
+
     const projectObj = lang
       ? {
           _id: 1,
@@ -51,11 +44,9 @@ class HotelPndController {
           province_id: 1,
         }
       : {};
-    const { data, meta } = await this.hotelService.findAll(
-      { page, limit: per_page, search, status, province_id: province_idObj },
-      searchFields,
-      projectObj,
-    );
+
+    const { data, meta } = await this.hotelService.findAll({ page, limit: per_page, search, status, hasPending }, searchFields, projectObj);
+
 
     // Map images to full URL
     const returnHotel = attachImages(data, ['images']);
@@ -120,8 +111,10 @@ class HotelPndController {
 
     try {
       const hotel = await this.hotelService.findById(id, projectObj);
+
       const imageAttached = attachImages([hotel], ['images']);
       res.status(200).json({ data: imageAttached[0], message: 'findOne' });
+
     } catch (error) {
       next(error);
     }
@@ -333,8 +326,10 @@ class HotelPndController {
       if (!getPendingHotel) {
         return res.status(404).json({ message: 'No pending hotel found for the provided hotel_id' });
       }
+
       const imageAttached = attachImages([getPendingHotel], ['images']);
       res.status(200).json({ data: imageAttached[0], message: 'findOne' });
+
     } catch (error) {
       next(error);
     }
