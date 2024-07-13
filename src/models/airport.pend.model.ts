@@ -10,9 +10,9 @@ const airportSchema = new Schema(
     en_city: { type: String, required: true },
     dr_city: { type: String, required: true },
     ps_city: { type: String, required: true },
-    IATA_Code: { type: String, required: true },
+    iata_code: { type: String, required: true },
     googleMapUrl: { type: String, required: true },
-    numbers_of_terminals: { type: Number, required: true },
+    number_of_terminals: { type: Number, required: true },
     location: {
       type: { type: String, enum: ['Point'], required: true },
       coordinates: { type: [Number], required: true },
