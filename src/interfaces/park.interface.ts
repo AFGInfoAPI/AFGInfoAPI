@@ -8,6 +8,7 @@ export interface Park extends Document {
   googleMapUrl: string;
   status?: boolean;
   images: string[];
+  province_id: string;
 }
 
 export interface ParkPnd extends Document {

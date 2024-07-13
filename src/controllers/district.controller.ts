@@ -118,7 +118,6 @@ class DistrictController {
 
       const imageAttached = attachImages([data], ['images']);
       res.status(200).json({ data: imageAttached[0], message: 'findOne' });
-
     } catch (error) {
       next(error);
     }
@@ -336,7 +335,6 @@ class DistrictController {
 
       const imageAttached = attachImages([pendingDistrict], ['images']);
       res.status(200).json({ data: imageAttached[0], message: 'findOne' });
-
     } catch (error) {
       next(error);
     }

@@ -29,10 +29,7 @@ class HospitalController {
       status = false;
     }
     const province_id = req.query.province as string;
-    let province_idObj;
-    if (province_id) {
-      province_idObj = new ObjectId(province_id);
-    }
+    const hasPending = req.query.hasPending === 'true' ? true : req.query.hasPending === 'false' ? false : undefined;
     const projectObj = lang
       ? {
           _id: 1,
@@ -52,12 +49,13 @@ class HospitalController {
         }
       : {};
     const { data, meta } = await this.hospitalService.findAll(
-      { page, limit: per_page, search, status, province_id: province_idObj },
+      { page, limit: per_page, search, status, province_id: hasPending },
       searchFields,
       projectObj,
     );
 
-    const returnHospital = attachImages(data, ['images']);
+    const filtered = province_id ? data.filter(hospital => hospital.province_id.toString() === province_id) : data;
+    const returnHospital = attachImages(filtered, ['images']);
 
     res.status(200).json({ data: returnHospital, meta, message: 'findAll' });
   };

@@ -11,6 +11,7 @@ export interface Airport extends Document {
   numbers_of_terminals: number;
   status?: boolean;
   images: string[];
+  province_id: string;
 }
 
 export interface AirportPnd extends Document {

@@ -10,6 +10,7 @@ export interface TouristicPlace extends Document {
   isNationalPark?: boolean;
   status?: boolean;
   images: string[];
+  province_id: string;
 }
 
 export interface TouristicPlacePnd extends Document {

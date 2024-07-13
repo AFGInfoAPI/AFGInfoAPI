@@ -28,11 +28,8 @@ class ParkController {
     } else if (req.query.status === 'false') {
       status = false;
     }
-    const province_id = req.query.province as string;
-    let province_idObj;
-    if (province_id) {
-      province_idObj = new ObjectId(province_id);
-    }
+    const hasPending = req.query.hasPending === 'true' ? true : req.query.hasPending === 'false' ? false : undefined;
+    const province_id = req.query.province_id as string;
     const projectObj = lang
       ? {
           _id: 1,
@@ -46,13 +43,13 @@ class ParkController {
         }
       : {};
     const { data, meta } = await this.parkService.findAll(
-      { page, limit: per_page, search, status, province_id: province_idObj },
+      { page, limit: per_page, search, status, province_id: hasPending },
       searchFields,
       projectObj,
     );
-
+    const filtered = data.filter((park: any) => park.province_id.toString() === province_id);
     // Map images to full URL
-    const returnParl = attachImages(data, ['images']);
+    const returnParl = attachImages(filtered, ['images']);
 
     res.status(200).json({
       data: returnParl,

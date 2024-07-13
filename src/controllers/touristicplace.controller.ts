@@ -22,8 +22,13 @@ class TouristicPlaceController {
     const search = req.query.search as string;
     const lang = req.query.lang as string;
     const searchFields = ['en_name', 'dr_name', 'ps_name'];
-
-    const status = req.query.status === 'true' ? true : req.query.status === 'false' ? false : undefined;
+    let status;
+    if (req.query.status === 'true') {
+      status = true;
+    } else if (req.query.status === 'false') {
+      status = false;
+    }
+    const province_id = req.query.province as string;
     const hasPending = req.query.hasPending === 'true' ? true : req.query.hasPending === 'false' ? false : undefined;
 
     const projectObj = lang
@@ -42,8 +47,7 @@ class TouristicPlaceController {
       : {};
 
     const { data, meta } = await this.touristicPlaceService.findAll({ page, limit: per_page, search, status, hasPending }, searchFields, projectObj);
-
-
+    const filtered = province_id ? data.filter(touristicPlace => touristicPlace.province_id.toString() === province_id) : data;
     // Map images to full URL
     const returnTouristicPlaces = attachImages(data, ['images']);
 
@@ -100,7 +104,6 @@ class TouristicPlaceController {
       const touristicplace = await this.touristicPlaceService.findById(id, projectObj);
       const imageAttached = attachImages([touristicplace], ['images']);
       return res.status(200).json({ data: imageAttached[0], message: 'findOne' });
-
     } catch (error) {
       next(error);
     }
