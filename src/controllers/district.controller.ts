@@ -22,7 +22,12 @@ class DistrictController {
     const search = req.query.search as string;
     const lang = req.query.lang as string;
     const searchFields = ['en_name', 'dr_name', 'ps_name', 'en_capital', 'dr_capital', 'ps_capital'];
-    const status = req.query.status === 'true' ? true : req.query.status === 'false' ? false : undefined;
+    let status;
+    if (req.query.status === 'true') {
+      status = true;
+    } else if (req.query.status === 'false') {
+      status = false;
+    }
     const province_id = req.query.province as string;
     const hasPending = req.query.hasPending === 'true' ? true : req.query.hasPending === 'false' ? false : undefined;
     const projectObj = lang
@@ -110,8 +115,10 @@ class DistrictController {
 
     try {
       const data = await this.districtService.findById(id, projectObj);
-      const withImages = attachImages([data], ['images']);
-      res.status(200).json({ data: withImages[0], message: 'findOne' });
+
+      const imageAttached = attachImages([data], ['images']);
+      res.status(200).json({ data: imageAttached[0], message: 'findOne' });
+
     } catch (error) {
       next(error);
     }
@@ -243,14 +250,14 @@ class DistrictController {
 
   public approveDistrictUpdate = async (req: Request, res: Response, next: NextFunction) => {
     const id = req.params.id;
-    const hasApproved = req.body.approved;
+    const hasApproved = JSON.parse(req.body.approved);
 
     try {
       if (hasApproved) {
         //get the pending district
         const pndDistrict = (await this.districtPndService.findById(id, {})) as DistrictPnd;
-        if (!pndDistrict) {
-          return res.status(404).json({ message: 'No pending district found' });
+        if (pndDistrict?.images.length < 1) {
+          delete pndDistrict.images;
         }
 
         //delete the _id to avoid id duplication
@@ -262,7 +269,9 @@ class DistrictController {
 
         res.status(200).json({ data: updateDistrict, message: 'approved' });
       } else {
-        await this.districtPndService.delete(id);
+        const deletedDistrict = await this.districtPndService.delete(id);
+        const district_Id = deletedDistrict.district_id;
+        await this.districtService.update(district_Id, { hasPending: false });
         res.status(200).json({ message: 'rejected' });
       }
     } catch (error) {
@@ -325,9 +334,9 @@ class DistrictController {
         return res.status(404).json({ message: 'No pending district found for the provided district_Id' });
       }
 
-      const withImages = attachImages([pendingDistrict], ['images']);
+      const imageAttached = attachImages([pendingDistrict], ['images']);
+      res.status(200).json({ data: imageAttached[0], message: 'findOne' });
 
-      res.status(200).json({ data: withImages[0], message: 'findOne' });
     } catch (error) {
       next(error);
     }

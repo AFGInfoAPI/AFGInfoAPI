@@ -5,6 +5,7 @@ import attachImages from '@/utils/helpers/attachImages';
 import { NextFunction, Request, Response } from 'express';
 import { Result, validationResult } from 'express-validator';
 import fs from 'fs';
+import { ObjectId } from 'mongodb';
 
 // Interface for MuterRequest
 interface MuterRequest extends Request {
@@ -21,8 +22,10 @@ class TouristicPlaceController {
     const search = req.query.search as string;
     const lang = req.query.lang as string;
     const searchFields = ['en_name', 'dr_name', 'ps_name'];
+
     const status = req.query.status === 'true' ? true : req.query.status === 'false' ? false : undefined;
     const hasPending = req.query.hasPending === 'true' ? true : req.query.hasPending === 'false' ? false : undefined;
+
     const projectObj = lang
       ? {
           _id: 1,
@@ -34,9 +37,12 @@ class TouristicPlaceController {
           googleMapUrl: 1,
           hasPending: 1,
           status: 1,
+          province_id: 1,
         }
       : {};
+
     const { data, meta } = await this.touristicPlaceService.findAll({ page, limit: per_page, search, status, hasPending }, searchFields, projectObj);
+
 
     // Map images to full URL
     const returnTouristicPlaces = attachImages(data, ['images']);
@@ -92,8 +98,9 @@ class TouristicPlaceController {
 
     try {
       const touristicplace = await this.touristicPlaceService.findById(id, projectObj);
-      const withImages = attachImages([touristicplace], ['images']);
-      return res.status(200).json({ data: withImages[0], message: 'findOne' });
+      const imageAttached = attachImages([touristicplace], ['images']);
+      return res.status(200).json({ data: imageAttached[0], message: 'findOne' });
+
     } catch (error) {
       next(error);
     }
@@ -227,13 +234,13 @@ class TouristicPlaceController {
 
   public approveTouristicPlaceUpdate = async (req: Request, res: Response, next: NextFunction) => {
     const id = req.params.id;
-    const hasApproved = req.body.approved;
+    const hasApproved = JSON.parse(req.body.approved);
 
     try {
       if (hasApproved) {
         const touristicPlacePnd = (await this.touristicPlacePndService.findById(id, {})) as TouristicPlacePnd;
-        if (!touristicPlacePnd) {
-          return res.status(404).json({ message: 'not found' });
+        if (touristicPlacePnd?.images.length < 1) {
+          delete touristicPlacePnd.images;
         }
         delete touristicPlacePnd._id;
         const updateTouristicPlace = await this.touristicPlaceService.update(touristicPlacePnd.touristic_place_id, {
@@ -244,7 +251,9 @@ class TouristicPlaceController {
         await this.touristicPlacePndService.delete(id);
         res.status(200).json({ data: updateTouristicPlace, message: 'approved' });
       } else {
-        await this.touristicPlacePndService.delete(id);
+        const deletedTouristicPlace = await this.touristicPlacePndService.delete(id);
+        const touristicplace_id = deletedTouristicPlace.touristic_place_id;
+        await this.touristicPlaceService.update(touristicplace_id, { hasPending: false });
         res.status(200).json({ message: 'rejected' });
       }
     } catch (error) {
@@ -302,8 +311,8 @@ class TouristicPlaceController {
       if (!pendingTouristicPlace) {
         return res.status(404).json({ message: 'No pending touristicPlace found for the provided touristicplace_id' });
       }
-
-      res.status(200).json({ data: pendingTouristicPlace, message: 'findOne' });
+      const imageAttached = attachImages([pendingTouristicPlace], ['images']);
+      res.status(200).json({ data: imageAttached[0], message: 'findOne' });
     } catch (error) {
       next(error);
     }

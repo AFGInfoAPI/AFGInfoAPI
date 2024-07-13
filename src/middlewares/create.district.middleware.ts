@@ -1,4 +1,3 @@
-import e from 'express';
 import { check } from 'express-validator';
 
 export const createDistrictValidation = [

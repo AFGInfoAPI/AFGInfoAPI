@@ -5,6 +5,7 @@ import attachImages from '@/utils/helpers/attachImages';
 import { NextFunction, Request, Response } from 'express';
 import { Result, validationResult } from 'express-validator';
 import fs from 'fs';
+import { ObjectId } from 'mongodb';
 
 //Interface for MulterRequest
 interface MulterRequest extends Request {
@@ -21,9 +22,11 @@ class AirportController {
     const search = req.query.search as string;
     const lang = req.query.lang as string;
     const searchFields = ['en_name', 'dr_name', 'ps_name'];
+
     const status = req.query.status === 'true' ? true : req.query.status === 'false' ? false : undefined;
     const province_id = req.query.province as string;
     const hasPending = req.query.hasPending === 'true' ? true : req.query.hasPending === 'false' ? false : undefined;
+
     const projectObj = lang
       ? {
           _id: 1,
@@ -36,9 +39,12 @@ class AirportController {
           numbers_of_terminals: 1,
           hasPending: 1,
           status: 1,
+          province_id: 1,
         }
       : {};
+
     const { data, meta } = await this.airportService.findAll({ page, limit: per_page, search, status, hasPending }, searchFields, projectObj);
+
 
     //Map images to full URL
     const returnAirports = attachImages(data, ['images']);
@@ -97,8 +103,8 @@ class AirportController {
     try {
       const data = await this.airportService.findById(id, projectObj);
 
-      const withImages = attachImages([data], ['images']);
-      res.status(200).json({ data: withImages[0], message: 'findOne' });
+      const imageAttached = attachImages([data], ['images']);
+      res.status(200).json({ data: imageAttached[0], message: 'findOne' });
     } catch (error) {
       next(error);
     }
@@ -230,13 +236,13 @@ class AirportController {
 
   public approveAirportUpdate = async (req: Request, res: Response, next: NextFunction) => {
     const id = req.params.id;
-    const hasApproved = req.body.approved;
+    const hasApproved = JSON.parse(req.body.approved);
 
     try {
       if (hasApproved) {
         const pndAirport = (await this.airportPndService.findById(id, {})) as AirportPnd;
-        if (!pndAirport) {
-          return res.status(404).json({ message: 'No pending district found' });
+        if (pndAirport?.images.length < 1) {
+          delete pndAirport.images;
         }
 
         delete pndAirport._id;
@@ -246,7 +252,9 @@ class AirportController {
 
         res.status(200).json({ data: updateAirport, message: 'approved' });
       } else {
-        await this.airportPndService.delete(id);
+        const deletedAirport = await this.airportPndService.delete(id);
+        const airport_id = deletedAirport.airport_id;
+        await this.airportService.update(airport_id, { hasPending: false });
         res.status(200).json({ message: 'rejected' });
       }
     } catch (error) {
@@ -256,7 +264,7 @@ class AirportController {
 
   public approveAirport = async (req: Request, res: Response, next: NextFunction) => {
     const id = req.params.id;
-    const hasApproved = req.body.approved;
+    const hasApproved = JSON.parse(req.body.approved);
 
     try {
       if (hasApproved) {
@@ -305,8 +313,8 @@ class AirportController {
       if (!getPendingAirport) {
         return res.status(404).json({ message: 'No pending airport found for the provided airport_id' });
       }
-
-      res.status(200).json({ data: getPendingAirport, message: 'findOne' });
+      const imageAttached = attachImages([getPendingAirport], ['images']);
+      res.status(200).json({ data: imageAttached[0], message: 'findOne' });
     } catch (error) {
       next(error);
     }

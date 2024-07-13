@@ -9,6 +9,7 @@ import TouristicPlace from './routes/touristicplace.route';
 import AirportRoute from './routes/airport.route';
 import HotelRoute from './routes/hotel.route';
 import ParkRoute from './routes/park.route';
+import HospitalRoute from './routes/hospital.route';
 
 validateEnv();
 
@@ -22,6 +23,7 @@ const app = new App([
   new AirportRoute(),
   new HotelRoute(),
   new ParkRoute(),
+  new HospitalRoute(),
 ]);
 
 app.listen();

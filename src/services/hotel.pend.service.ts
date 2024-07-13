@@ -8,6 +8,7 @@ class HotelPndService extends BaseService<HotelPnd> {
   constructor() {
     super(HotelPndModel);
   }
+
 }
 
 export default HotelPndService;

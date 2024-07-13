@@ -5,6 +5,7 @@ import attachImages from '@/utils/helpers/attachImages';
 import { NextFunction, Request, Response } from 'express';
 import { Result, validationResult } from 'express-validator';
 import fs from 'fs';
+import { ObjectId } from 'mongodb';
 
 //Interface for MulterRequest
 interface MulterRequest extends Request {
@@ -21,7 +22,17 @@ class ParkController {
     const search = req.query.search as string;
     const lang = req.query.lang as string;
     const searchFields = ['en_name', 'dr_name', 'ps_name'];
-    const status = req.query.status === 'true' || true ? true : req.query.status === 'false' ? false : undefined;
+    let status;
+    if (req.query.status === 'true') {
+      status = true;
+    } else if (req.query.status === 'false') {
+      status = false;
+    }
+    const province_id = req.query.province as string;
+    let province_idObj;
+    if (province_id) {
+      province_idObj = new ObjectId(province_id);
+    }
     const projectObj = lang
       ? {
           _id: 1,
@@ -31,9 +42,14 @@ class ParkController {
           googleMapUrl: 1,
           hasPending: 1,
           status: 1,
+          province_id: 1,
         }
       : {};
-    const { data, meta } = await this.parkService.findAll({ page, limit: per_page, search, status }, searchFields, projectObj);
+    const { data, meta } = await this.parkService.findAll(
+      { page, limit: per_page, search, status, province_id: province_idObj },
+      searchFields,
+      projectObj,
+    );
 
     // Map images to full URL
     const returnParl = attachImages(data, ['images']);
@@ -92,7 +108,8 @@ class ParkController {
 
     try {
       const data = await this.parkService.findById(id, projectObj);
-      res.status(200).json({ data, message: 'findOne' });
+      const imageAttached = attachImages([data], ['images']);
+      res.status(200).json({ data: imageAttached[0], message: 'findOne' });
     } catch (error) {
       next(error);
     }
@@ -224,14 +241,14 @@ class ParkController {
 
   public approveParkUpdate = async (req: Request, res: Response, next: NextFunction) => {
     const id = req.params.id;
-    const hasApproved = req.body.approved;
+    const hasApproved = JSON.parse(req.body.approved);
 
     try {
       if (hasApproved) {
         //get the pending district
         const pndPark = (await this.parkPndService.findById(id, {})) as ParkPnd;
-        if (!pndPark) {
-          return res.status(404).json({ message: 'No pending park found' });
+        if (pndPark.images.length < 1) {
+          delete pndPark.images;
         }
 
         //delete the _id to avoid id duplication
@@ -243,7 +260,9 @@ class ParkController {
 
         res.status(200).json({ data: updatePark, message: 'approved' });
       } else {
-        await this.parkPndService.delete(id);
+        const deletedPark = await this.parkPndService.delete(id);
+        const park_Id = deletedPark.park_id;
+        await this.parkService.update(park_Id, { hasPending: false });
         res.status(200).json({ message: 'rejected' });
       }
     } catch (error) {
@@ -253,7 +272,7 @@ class ParkController {
 
   public approvePark = async (req: Request, res: Response, next: NextFunction) => {
     const id = req.params.id;
-    const hasApproved = req.body.approved;
+    const hasApproved = JSON.parse(req.body.approved);
 
     try {
       if (hasApproved) {
@@ -299,8 +318,8 @@ class ParkController {
       if (!pendingPark) {
         return res.status(404).json({ message: 'No pending park found for the provided park_Id' });
       }
-
-      res.status(200).json({ data: pendingPark, message: 'findOne' });
+      const imageAttached = attachImages([pendingPark], ['images']);
+      res.status(200).json({ data: imageAttached[0], message: 'findOne' });
     } catch (error) {
       next(error);
     }
