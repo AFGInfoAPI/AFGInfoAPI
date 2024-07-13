@@ -11,8 +11,8 @@ class ParkPndService extends BaseService<ParkPnd> {
   // Add the findOne method
   public async findOne(queryObject, projectObj): Promise<ParkPnd | null> {
     try {
-      const result = await this.parks.findOne(queryObject, projectObj).exec();
-      return result;
+      const result = await this.parks.findOne(queryObject, projectObj).lean();
+      return result as ParkPnd;
     } catch (error) {
       // Log the error or handle it as needed
       console.error('Error finding document:', error);

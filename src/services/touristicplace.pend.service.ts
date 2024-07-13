@@ -11,8 +11,8 @@ class TouristicPlacePndService extends BaseService<TouristicPlacePnd> {
   // Add the findOne method
   public async findOne(queryObject, projectObj): Promise<TouristicPlacePnd | null> {
     try {
-      const result = await this.touristicPlaces.findOne(queryObject, projectObj).exec();
-      return result;
+      const result = await this.touristicPlaces.findOne(queryObject, projectObj).lean();
+      return result as TouristicPlacePnd;
     } catch (error) {
       // Log the error or handle it as needed
       console.error('Error finding document:', error);

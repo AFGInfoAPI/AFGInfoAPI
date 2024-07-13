@@ -1,27 +1,27 @@
-import { HotelPnd } from '@/interfaces/hotel.interface';
-import HotelPndService from '@/services/hotel.pend.service';
-import HotelService from '@/services/hotel.service';
+import { HospitalPnd } from '@/interfaces/hospital.interface';
+import HospitalPndService from '@/services/hostipal.pend.service';
+import HospitalService from '@/services/hospital.service';
 import attachImages from '@/utils/helpers/attachImages';
 import { NextFunction, Request, Response } from 'express';
 import { Result, validationResult } from 'express-validator';
 import fs from 'fs';
 import { ObjectId } from 'mongodb';
 
-//Interface for MutlerRequest
+//interface for MuterRequset
 interface MulterRequest extends Request {
   files: Express.Multer.File[];
 }
 
-class HotelPndController {
-  public hotelPndService = new HotelPndService();
-  public hotelService = new HotelService();
+class HospitalController {
+  public hospitalService = new HospitalService();
+  public hospitalPndService = new HospitalPndService();
 
-  public getHotels = async (req: Request, res: Response) => {
+  public getHospitals = async (req: Request, res: Response) => {
     const page = parseInt(req.query.page as string) || 1;
     const per_page = parseInt(req.query.per_page as string) || 10;
     const search = req.query.search as string;
     const lang = req.query.lang as string;
-    const searchFields = ['en_name', 'dr_name', 'ps_name'];
+    const searchFields = ['en_name', 'dr_name', 'ps_name', 'en_capital', 'dr_capital', 'ps_capital'];
     let status;
     if (req.query.status === 'true') {
       status = true;
@@ -37,12 +37,12 @@ class HotelPndController {
       ? {
           _id: 1,
           name: `$${lang}_name`,
-          description: `$${lang}_description`,
           address: `$${lang}_address`,
+          numberOfBeds: 1,
+          ambulancePhone: 1,
           images: 1,
           email: 1,
           phone: 1,
-          star: 1,
           rating: 1,
           location: 1,
           googleMapUrl: 1,
@@ -51,23 +51,18 @@ class HotelPndController {
           province_id: 1,
         }
       : {};
-    const { data, meta } = await this.hotelService.findAll(
+    const { data, meta } = await this.hospitalService.findAll(
       { page, limit: per_page, search, status, province_id: province_idObj },
       searchFields,
       projectObj,
     );
 
-    // Map images to full URL
-    const returnHotel = attachImages(data, ['images']);
+    const returnHospital = attachImages(data, ['images']);
 
-    res.status(200).json({
-      data: returnHotel,
-      meta,
-      message: 'findAll',
-    });
+    res.status(200).json({ data: returnHospital, meta, message: 'findAll' });
   };
 
-  public createHotel = async (req: MulterRequest, res: Response, next: NextFunction) => {
+  public createHospital = async (req: MulterRequest, res: Response, next: NextFunction) => {
     try {
       const result: Result = validationResult(req);
       if (!result.isEmpty()) {
@@ -78,7 +73,7 @@ class HotelPndController {
         return res.status(400).json({ errors: errorObject });
       }
 
-      const hotelData = req.body;
+      const hospitalData = req.body;
       const images = Object.keys(req.files).reduce((acc, key) => {
         if (key.startsWith('images[') && key.endsWith(']')) {
           acc.push(req.files[key][0].filename);
@@ -88,28 +83,28 @@ class HotelPndController {
 
       const location = {
         type: 'Point',
-        coordinates: [Number(hotelData.lng), Number(hotelData.lat)],
+        coordinates: [Number(hospitalData.lng), Number(hospitalData.lat)],
       };
-      const hotel = await this.hotelService.create({ ...hotelData, images, location });
-      res.status(201).json({ data: hotel, message: 'created' });
+      const hospital = await this.hospitalService.create({ ...hospitalData, images, location });
+      res.status(201).json({ data: hospital, message: 'created' });
     } catch (error) {
       next(error);
     }
   };
 
-  public getHotelById = async (req: Request, res: Response, next: NextFunction) => {
+  public getHospitalById = async (req: Request, res: Response, next: NextFunction) => {
     const id = req.params.id;
     const lang = req.query.lang as string;
     const projectObj = lang
       ? {
           _id: 1,
           name: `$${lang}_name`,
-          description: `$${lang}_description`,
           address: `$${lang}_address`,
+          numberOfBeds: 1,
+          ambulancePhone: 1,
           images: 1,
           email: 1,
           phone: 1,
-          star: 1,
           rating: 1,
           location: 1,
           googleMapUrl: 1,
@@ -119,15 +114,15 @@ class HotelPndController {
       : {};
 
     try {
-      const hotel = await this.hotelService.findById(id, projectObj);
-      const imageAttached = attachImages([hotel], ['images']);
+      const hospital = await this.hospitalService.findById(id, projectObj);
+      const imageAttached = attachImages([hospital], ['images']);
       res.status(200).json({ data: imageAttached[0], message: 'findOne' });
     } catch (error) {
       next(error);
     }
   };
 
-  public updateHotel = async (req: MulterRequest, res: Response, next: NextFunction) => {
+  public updateHospital = async (req: MulterRequest, res: Response, next: NextFunction) => {
     const id = req.params.id;
 
     try {
@@ -140,7 +135,7 @@ class HotelPndController {
         return res.status(400).json({ errors: errorObject });
       }
 
-      const hotelData = req.body;
+      const hospitalData = req.body;
       const images = Object.keys(req.files).reduce((acc, key) => {
         if (key.startsWith('images[') && key.endsWith(']')) {
           acc.push(req.files[key][0].filename);
@@ -150,65 +145,65 @@ class HotelPndController {
 
       const location = {
         type: 'Point',
-        coordinates: [Number(hotelData.lng), Number(hotelData.lat)],
+        coordinates: [Number(hospitalData.lng), Number(hospitalData.lat)],
       };
-      const hotel = await this.hotelService.findById(id);
-      if (!hotel) {
-        return res.status(404).json({ message: ' hotel not found' });
+      const hospital = await this.hospitalService.findById(id);
+      if (!hospital) {
+        return res.status(404).json({ message: ' hospital not found' });
       }
 
-      const pndhotel = await this.hotelPndService.create({ ...hotelData, images, location, hotel_id: id });
-      await this.hotelService.update(id, { hasPending: true });
-      res.status(200).json({ data: pndhotel, message: 'updated' });
+      const pndhospital = await this.hospitalPndService.create({ ...hospitalData, images, location, hospital_id: id });
+      await this.hospitalService.update(id, { hasPending: true });
+      res.status(200).json({ data: pndhospital, message: 'updated' });
     } catch (error) {
       next(error);
     }
   };
 
-  public updteHotelImages = async (req: MulterRequest, res: Response, next: NextFunction) => {
+  public updateHospitalImages = async (req: MulterRequest, res: Response, next: NextFunction) => {
     const id = req.params.id;
 
     try {
-      const hotel = (await this.hotelService.findById(id, { images: 1, _id: 1 })) as { images: string[] };
-      const images = hotel.images;
+      const hospital = (await this.hospitalService.findById(id, { images: 1, _id: 1 })) as { images: string[] };
+      const images = hospital.images;
       const newImages = Object.keys(req.files).reduce((acc, key) => {
         if (key.startsWith('images[') && key.endsWith(']')) {
           acc.push(req.files[key][0].filename);
         }
         return acc;
       }, []);
-      hotel.images = [...images, ...newImages];
-      const response = await this.hotelService.update(id, hotel);
+      hospital.images = [...images, ...newImages];
+      const response = await this.hospitalService.update(id, hospital);
       res.status(200).json({ data: response, message: 'updated' });
     } catch (error) {
       next(error);
     }
   };
 
-  public deleteHotel = async (req: Request, res: Response, next: NextFunction) => {
+  public deleteHospital = async (req: Request, res: Response, next: NextFunction) => {
     const id = req.params.id;
 
     try {
-      const hotel = await this.hotelService.delete(id);
-      res.status(200).json({ data: hotel, message: 'deleted' });
+      const hospital = await this.hospitalService.delete(id);
+      res.status(200).json({ data: hospital, message: 'deleted' });
     } catch (error) {
       next(error);
     }
   };
 
-  public deleteHotelImage = async (req: Request, res: Response, next: NextFunction) => {
+  public deleteHospitalImage = async (req: Request, res: Response, next: NextFunction) => {
     const id = req.params.id;
     const image_name = req.params.image_name;
 
     try {
-      const hotel = await this.hotelService.findById(id, { images: 1, _id: 1 });
-      const images = hotel.images;
+      const hospital = await this.hospitalService.findById(id, { images: 1, _id: 1 });
+      const images = hospital.images;
       if (!images.includes(image_name)) {
         return res.status(404).json({ message: 'Image not found' });
       }
       const newImages = images.filter(image => image !== image_name);
-      hotel.images = newImages;
-      const response = await this.hotelService.update(id, hotel);
+      hospital.images = newImages;
+      const response = await this.hospitalService.update(id, hospital);
 
       // Delete image from uploads folder
       const path = `uploads/${image_name}`;
@@ -223,7 +218,7 @@ class HotelPndController {
     }
   };
 
-  public getNearbyHotels = async (req: Request, res: Response, next: NextFunction) => {
+  public getNearbyHospitals = async (req: Request, res: Response, next: NextFunction) => {
     const result: Result = validationResult(req);
 
     if (!result.isEmpty()) {
@@ -241,35 +236,35 @@ class HotelPndController {
     }
 
     try {
-      const nearbyHotels = await this.hotelService.getNearbyHotels(parseFloat(lat as string), parseFloat(lng as string));
+      const nearbyHospitals = await this.hospitalService.getNearbyHospitals(parseFloat(lat as string), parseFloat(lng as string));
 
       // Map images to full URL
-      const returnHotels = attachImages(nearbyHotels, ['images']);
-      res.status(200).json({ data: returnHotels, message: 'findNearby' });
+      const returnHospitals = attachImages(nearbyHospitals, ['images']);
+      res.status(200).json({ data: returnHospitals, message: 'findNearby' });
     } catch (error) {
       next(error);
     }
   };
 
-  public approveHotel = async (req: Request, res: Response, next: NextFunction) => {
+  public approveHospital = async (req: Request, res: Response, next: NextFunction) => {
     const id = req.params.id;
     const hasApproved = JSON.parse(req.body.approved);
 
     try {
       if (hasApproved) {
-        const hotel = await this.hotelService.findById(id, {});
-        if (!hotel) {
-          return res.status(404).json({ message: 'No pending hotel found' });
+        const hospital = await this.hospitalService.findById(id, {});
+        if (!hospital) {
+          return res.status(404).json({ message: 'No pending hospital found' });
         }
 
-        if (!hotel?.status) {
-          const approvedhotel = await this.hotelService.update(id, { ...hotel, status: true });
-          res.status(200).json({ data: approvedhotel, message: 'approved' });
-        } else if (hotel.status) {
-          res.status(400).json({ message: 'hotel is already approved' });
+        if (!hospital?.status) {
+          const approvedhospital = await this.hospitalService.update(id, { ...hospital, status: true });
+          res.status(200).json({ data: approvedhospital, message: 'approved' });
+        } else if (hospital.status) {
+          res.status(400).json({ message: 'hospital is already approved' });
         }
       } else {
-        await this.hotelService.delete(id);
+        await this.hospitalService.delete(id);
         res.status(200).json({ message: 'rejected' });
       }
     } catch (error) {
@@ -277,27 +272,27 @@ class HotelPndController {
     }
   };
 
-  public approveHotelPnd = async (req: Request, res: Response, next: NextFunction) => {
+  public approveHospitalPnd = async (req: Request, res: Response, next: NextFunction) => {
     const id = req.params.id;
     const hasApproved = JSON.parse(req.body.approved);
 
     try {
       if (hasApproved) {
-        const pndhotel = (await this.hotelPndService.findById(id, {})) as HotelPnd;
-        if (pndhotel?.images.length < 1) {
-          delete pndhotel.images;
+        const pndhospital = (await this.hospitalPndService.findById(id, {})) as HospitalPnd;
+        if (pndhospital?.images.length < 1) {
+          delete pndhospital.images;
         }
 
-        delete pndhotel._id;
-        const updateHotel = await this.hotelService.update(pndhotel.hotel_id, { ...pndhotel, hasPending: false });
+        delete pndhospital._id;
+        const updateHospital = await this.hospitalService.update(pndhospital.hospital_id, { ...pndhospital, hasPending: false });
 
-        await this.hotelPndService.delete(id);
+        await this.hospitalPndService.delete(id);
 
-        res.status(200).json({ data: updateHotel, message: 'approved' });
+        res.status(200).json({ data: updateHospital, message: 'approved' });
       } else {
-        const deletedHotel = await this.hotelPndService.delete(id);
-        const hotel_id = deletedHotel.hotel_id;
-        await this.hotelService.update(hotel_id, { hasPending: false });
+        const deleteHospital = await this.hospitalPndService.delete(id);
+        const hospital_id = deleteHospital.hospital_id;
+        await this.hospitalService.update(hospital_id, { hasPending: false });
         res.status(200).json({ message: 'rejected' });
       }
     } catch (error) {
@@ -305,8 +300,8 @@ class HotelPndController {
     }
   };
 
-  public getPendingHotels = async (req: Request, res: Response, next: NextFunction) => {
-    const hotelId = req.params.id;
+  public getPendingHospitals = async (req: Request, res: Response, next: NextFunction) => {
+    const hospitalId = req.params.id;
     const lang = req.query.lang as string;
 
     const projectObj = lang
@@ -328,12 +323,12 @@ class HotelPndController {
       : {};
 
     try {
-      const getPendingHotel = await this.hotelPndService.findOne({ hotel_id: hotelId }, projectObj);
+      const getPendingHospitals = await this.hospitalPndService.findOne({ hospital_id: hospitalId }, projectObj);
 
-      if (!getPendingHotel) {
-        return res.status(404).json({ message: 'No pending hotel found for the provided hotel_id' });
+      if (!getPendingHospitals) {
+        return res.status(404).json({ message: 'No pending hostipal found for the provided hospital_id' });
       }
-      const imageAttached = attachImages([getPendingHotel], ['images']);
+      const imageAttached = attachImages([getPendingHospitals], ['images']);
       res.status(200).json({ data: imageAttached[0], message: 'findOne' });
     } catch (error) {
       next(error);
@@ -341,4 +336,4 @@ class HotelPndController {
   };
 }
 
-export default HotelPndController;
+export default HospitalController;
