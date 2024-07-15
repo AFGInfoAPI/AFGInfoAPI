@@ -47,19 +47,31 @@ class DistrictRoute {
       .fill(0)
       .map((_, i) => ({ name: `images[${i}]` }));
 
-    uploadRouter.post('/', this.upload.fields(fields), createDistrictValidation, this.districtController.createDistrict);
-    uploadRouter.patch('/:id', this.upload.fields(fields), createDistrictValidation, this.districtController.updateDistrict);
-    uploadRouter.delete('/:id', this.districtController.deleteDistrict);
-    uploadRouter.patch('/:id/images', this.upload.fields(fields), this.districtController.updateDistrictImages);
-    uploadRouter.delete('/:id/images/:image_name', this.districtController.deleteDistrictImage);
+    uploadRouter.post(
+      '/',
+      authorize(['admin', 'creator']),
+      this.upload.fields(fields),
+      createDistrictValidation,
+      this.districtController.createDistrict,
+    );
+    uploadRouter.patch(
+      '/:id',
+      authorize(['admin', 'creator']),
+      this.upload.fields(fields),
+      createDistrictValidation,
+      this.districtController.updateDistrict,
+    );
+    uploadRouter.delete('/:id', authorize(['admin', 'auth']), this.districtController.deleteDistrict);
+    uploadRouter.patch('/:id/images', authorize(['admin', 'creator']), this.upload.fields(fields), this.districtController.updateDistrictImages);
+    uploadRouter.delete('/:id/images/:image_name', authorize(['admin', 'auth']), this.districtController.deleteDistrictImage);
 
     // Use the upload router without multer middleware
     this.router.use(`${this.path}`, uploadRouter);
 
-    this.router.get(`${this.path}/pending/:id`, this.districtController.getPendingDistrict);
+    this.router.get(`${this.path}/pending/:id`, authorize(['admin', 'auth', 'creator']), this.districtController.getPendingDistrict);
     this.router.post(`${this.path}/approve_update/:id`, authorize(['admin', 'auth']), this.districtController.approveDistrictUpdate);
-    this.router.post(`${this.path}/approve/:id`, this.districtController.approveDistrict);
-    this.router.get(`${this.path}/nearbyDistricts`, nearByValidation, this.districtController.getNearbyDistricts);
+    this.router.post(`${this.path}/approve/:id`, authorize(['admin', 'auth']), this.districtController.approveDistrict);
+    this.router.get(`${this.path}/nearby`, nearByValidation, this.districtController.getNearbyDistricts);
     this.router.get(`${this.path}`, this.districtController.getDistricts);
     this.router.get(`${this.path}/:id`, this.districtController.getDistrictById);
   }
