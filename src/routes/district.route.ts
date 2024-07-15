@@ -6,6 +6,7 @@ import { validateFile } from '@/middlewares/filevalidator.middleware';
 import nearByValidation from '@/middlewares/nearby.validation.middleware';
 import authMiddleware from '@/middlewares/auth.middleware';
 import { HttpException } from '@/exceptions/HttpException';
+import authorize from '@/middlewares/authorize.middleware';
 
 class DistrictRoute {
   public path = '/districts';
@@ -56,7 +57,7 @@ class DistrictRoute {
     this.router.use(`${this.path}`, uploadRouter);
 
     this.router.get(`${this.path}/pending/:id`, this.districtController.getPendingDistrict);
-    this.router.post(`${this.path}/approve_update/:id`, this.districtController.approveDistrictUpdate);
+    this.router.post(`${this.path}/approve_update/:id`, authorize(['admin', 'auth']), this.districtController.approveDistrictUpdate);
     this.router.post(`${this.path}/approve/:id`, this.districtController.approveDistrict);
     this.router.get(`${this.path}/nearbyDistricts`, nearByValidation, this.districtController.getNearbyDistricts);
     this.router.get(`${this.path}`, this.districtController.getDistricts);

@@ -11,6 +11,11 @@ const userSchema: Schema = new Schema({
     type: String,
     required: true,
   },
+  role: {
+    type: String,
+    enum: ['auth', 'admin', 'creator'],
+    default: 'admin',
+  },
 });
 
 const userModel = model<User & Document>('User', userSchema);
