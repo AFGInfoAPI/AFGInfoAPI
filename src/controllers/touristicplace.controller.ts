@@ -1,3 +1,4 @@
+import { RequestWithUser } from '@/interfaces/auth.interface';
 import { TouristicPlacePnd } from '@/interfaces/touristicplace.interface';
 import TouristicPlacePndService from '@/services/touristicplace.pend.service';
 import TouristicPlaceService from '@/services/touristicplace.service';
@@ -16,7 +17,7 @@ class TouristicPlaceController {
   public touristicPlaceService = new TouristicPlaceService();
   public touristicPlacePndService = new TouristicPlacePndService();
 
-  public getTouristicPlaces = async (req: Request, res: Response) => {
+  public getTouristicPlaces = async (req: RequestWithUser, res: Response) => {
     const page = parseInt(req.query.page as string) || 1;
     const per_page = parseInt(req.query.per_page as string) || 10;
     const search = req.query.search as string;
@@ -27,6 +28,10 @@ class TouristicPlaceController {
       status = true;
     } else if (req.query.status === 'false') {
       status = false;
+    }
+
+    if (!req.isAuth) {
+      status = true;
     }
     const province_id = req.query.province as string;
     const hasPending = req.query.hasPending === 'true' ? true : req.query.hasPending === 'false' ? false : undefined;
@@ -102,6 +107,9 @@ class TouristicPlaceController {
 
     try {
       const touristicplace = await this.touristicPlaceService.findById(id, projectObj);
+      if (!touristicplace.status) {
+        return res.status(404).json({ message: 'not found' });
+      }
       const imageAttached = attachImages([touristicplace], ['images']);
       return res.status(200).json({ data: imageAttached[0], message: 'findOne' });
     } catch (error) {
