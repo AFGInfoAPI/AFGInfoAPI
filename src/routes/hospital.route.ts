@@ -5,6 +5,7 @@ import { createHospitalValidation } from '@/middlewares/create.hospital.middlewa
 import authMiddleware from '@/middlewares/auth.middleware';
 import { HttpException } from '@/exceptions/HttpException';
 import nearByValidation from '@/middlewares/nearby.validation.middleware';
+import authorize from '@/middlewares/authorize.middleware';
 
 class HospitalRoute {
   public path = '/hospitals';
@@ -45,21 +46,33 @@ class HospitalRoute {
       .fill(0)
       .map((_, i) => ({ name: `images[${i}]` }));
 
-    uploadRouter.post('/', this.upload.fields(fields), createHospitalValidation, this.hospitalController.createHospital);
-    uploadRouter.patch('/:id', this.upload.fields(fields), createHospitalValidation, this.hospitalController.updateHospital);
-    uploadRouter.delete('/:id', this.hospitalController.deleteHospital);
-    uploadRouter.patch('/:id/images', this.upload.fields(fields), this.hospitalController.updateHospitalImages);
-    uploadRouter.delete('/:id/images/:image_name', this.hospitalController.deleteHospitalImage);
+    uploadRouter.post(
+      '/',
+      authorize(['admin', 'creator']),
+      this.upload.fields(fields),
+      createHospitalValidation,
+      this.hospitalController.createHospital,
+    );
+    uploadRouter.patch(
+      '/:id',
+      authorize(['admin', 'creator']),
+      this.upload.fields(fields),
+      createHospitalValidation,
+      this.hospitalController.updateHospital,
+    );
+    uploadRouter.delete('/:id', authorize(['admin', 'auth']), this.hospitalController.deleteHospital);
+    uploadRouter.patch('/:id/images', authorize(['admin', 'creator']), this.upload.fields(fields), this.hospitalController.updateHospitalImages);
+    uploadRouter.delete('/:id/images/:image_name', authorize(['admin', 'auth']), this.hospitalController.deleteHospitalImage);
 
     // Use the upload router without multer middleware
     this.router.use(`${this.path}`, uploadRouter);
 
-    this.router.get(`${this.path}`, this.hospitalController.getHospitals);
-    this.router.get(`${this.path}/pending/:id`, this.hospitalController.getPendingHospitals);
-    this.router.post(`${this.path}/approve_update/:id`, this.hospitalController.approveHospitalPnd);
-    this.router.post(`${this.path}/approve/:id`, this.hospitalController.approveHospital);
-    this.router.get(`${this.path}/nearbyHospitals`, nearByValidation, this.hospitalController.getNearbyHospitals);
+    this.router.get(`${this.path}/pending/:id`, authorize(['admin', 'creator', 'auth']), this.hospitalController.getPendingHospitals);
+    this.router.post(`${this.path}/approve_update/:id`, authorize(['admin', 'auth']), this.hospitalController.approveHospitalPnd);
+    this.router.post(`${this.path}/approve/:id`, authorize(['admin', 'auth']), this.hospitalController.approveHospital);
+    this.router.get(`${this.path}/nearby`, nearByValidation, this.hospitalController.getNearbyHospitals);
     this.router.get(`${this.path}/:id`, this.hospitalController.getHospitalById);
+    this.router.get(`${this.path}`, this.hospitalController.getHospitals);
   }
 }
 

@@ -6,6 +6,7 @@ import { validateFile } from '@/middlewares/filevalidator.middleware';
 import nearByValidation from '@/middlewares/nearby.validation.middleware';
 import authMiddleware from '@/middlewares/auth.middleware';
 import { HttpException } from '@/exceptions/HttpException';
+import authorize from '@/middlewares/authorize.middleware';
 
 class AirportRoute {
   public path = '/airports';
@@ -46,19 +47,31 @@ class AirportRoute {
       .fill(0)
       .map((_, i) => ({ name: `images[${i}]` }));
 
-    uploadRouter.post('/', this.upload.fields(fields), createAirportValidation, this.airportController.createAirport);
-    uploadRouter.patch('/:id', this.upload.fields(fields), createAirportValidation, this.airportController.updateAirport);
-    uploadRouter.delete('/:id', this.airportController.deleteAirport);
-    uploadRouter.patch('/:id/images', this.upload.fields(fields), this.airportController.updateAirportImages);
-    uploadRouter.delete('/:id/images/:image_name', this.airportController.deleteAirportImages);
+    uploadRouter.post(
+      '/',
+      authorize(['admin', 'creator']),
+      this.upload.fields(fields),
+      createAirportValidation,
+      this.airportController.createAirport,
+    );
+    uploadRouter.patch(
+      '/:id',
+      authorize(['admin', 'creator']),
+      this.upload.fields(fields),
+      createAirportValidation,
+      this.airportController.updateAirport,
+    );
+    uploadRouter.delete('/:id', authorize(['admin', 'auth']), this.airportController.deleteAirport);
+    uploadRouter.patch('/:id/images', authorize(['admin', 'creator']), this.upload.fields(fields), this.airportController.updateAirportImages);
+    uploadRouter.delete('/:id/images/:image_name', authorize(['admin', 'auth']), this.airportController.deleteAirportImages);
 
     // Use the upload router without multer middleware
     this.router.use(`${this.path}`, uploadRouter);
 
-    this.router.get(`${this.path}/pending/:id`, this.airportController.getPendingAirports);
-    this.router.post(`${this.path}/approve_update/:id`, this.airportController.approveAirportUpdate);
-    this.router.post(`${this.path}/approve/:id`, this.airportController.approveAirport);
-    this.router.get(`${this.path}/nearbyAirports`, nearByValidation, this.airportController.getNearbyAirport);
+    this.router.get(`${this.path}/pending/:id`, authorize(['admin', 'creator', 'auth']), this.airportController.getPendingAirports);
+    this.router.post(`${this.path}/approve_update/:id`, authorize(['admin', 'auth']), this.airportController.approveAirportUpdate);
+    this.router.post(`${this.path}/approve/:id`, authorize(['admin', 'auth']), this.airportController.approveAirport);
+    this.router.get(`${this.path}/nearby`, nearByValidation, this.airportController.getNearbyAirport);
     this.router.get(`${this.path}/:id`, this.airportController.getAirportById);
     this.router.get(`${this.path}`, this.airportController.getAirports);
   }

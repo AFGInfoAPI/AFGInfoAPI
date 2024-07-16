@@ -1,3 +1,4 @@
+import { RequestWithUser } from '@/interfaces/auth.interface';
 import { ParkPnd } from '@/interfaces/park.interface';
 import ParkPndService from '@/services/park.pend.service';
 import ParkService from '@/services/park.service';
@@ -16,7 +17,7 @@ class ParkController {
   public parkService = new ParkService();
   public parkPndService = new ParkPndService();
 
-  getParks = async (req: Request, res: Response) => {
+  getParks = async (req: RequestWithUser, res: Response) => {
     const page = parseInt(req.query.page as string) || 1;
     const per_page = parseInt(req.query.per_page as string) || 10;
     const search = req.query.search as string;
@@ -27,6 +28,10 @@ class ParkController {
       status = true;
     } else if (req.query.status === 'false') {
       status = false;
+    }
+
+    if (!req.isAuth) {
+      status = true;
     }
     const hasPending = req.query.hasPending === 'true' ? true : req.query.hasPending === 'false' ? false : undefined;
     const province_id = req.query.province_id as string;
@@ -105,6 +110,8 @@ class ParkController {
 
     try {
       const data = await this.parkService.findById(id, projectObj);
+
+      if (!data.status) return res.status(404).json({ message: 'park not found' });
       const imageAttached = attachImages([data], ['images']);
       res.status(200).json({ data: imageAttached[0], message: 'findOne' });
     } catch (error) {
