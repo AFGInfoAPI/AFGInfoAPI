@@ -5,6 +5,7 @@ import { createProvinceValidation } from '@/middlewares/create.province.middlewa
 import nearByValidation from '@/middlewares/nearby.validation.middleware';
 import authMiddleware from '@/middlewares/auth.middleware';
 import { HttpException } from '@/exceptions/HttpException';
+import authorize from '@/middlewares/authorize.middleware';
 
 class ProvinceRoute {
   public path = '/provinces';
@@ -39,25 +40,38 @@ class ProvinceRoute {
   private initializeRoutes() {
     // Create a new router to handle the upload routes
     const uploadRouter = Router();
+    const protectedRouter = Router();
 
     // Generate an array of field configurations for multer
     const fields = Array(10)
       .fill(0)
       .map((_, i) => ({ name: `images[${i}]` }));
 
-    uploadRouter.post('/', this.upload.fields(fields), createProvinceValidation, this.provinceController.createProvince);
-    uploadRouter.patch('/:id', this.upload.fields(fields), createProvinceValidation, this.provinceController.updateProvince);
-    uploadRouter.delete('/:id', this.provinceController.deleteProvince);
-    uploadRouter.patch('/:id/images', this.upload.fields(fields), this.provinceController.updateProvinceImages);
-    uploadRouter.delete('/:id/images/:image_name', this.provinceController.deleteProvinceImage);
+    uploadRouter.post(
+      '/',
+      authorize(['admin', 'creator']),
+      this.upload.fields(fields),
+      createProvinceValidation,
+      this.provinceController.createProvince,
+    );
+    uploadRouter.patch(
+      '/:id',
+      authorize(['admin', 'creator']),
+      this.upload.fields(fields),
+      createProvinceValidation,
+      this.provinceController.updateProvince,
+    );
+    uploadRouter.delete('/:id', authorize(['admin']), this.provinceController.deleteProvince);
+    uploadRouter.patch('/:id/images', authorize(['admin', 'creator']), this.upload.fields(fields), this.provinceController.updateProvinceImages);
+    uploadRouter.delete('/:id/images/:image_name', authorize(['admin', 'creator']), this.provinceController.deleteProvinceImage);
 
     // Use the upload router without multer middleware
     this.router.use(`${this.path}`, uploadRouter);
 
-    this.router.get(`${this.path}/pending/:id`, this.provinceController.getPendingProvince);
-    this.router.post(`${this.path}/approve_update/:id`, this.provinceController.approveProvinceUpdate);
-    this.router.post(`${this.path}/approve/:id`, this.provinceController.approveProvince);
-    this.router.get(`${this.path}/nearbyProvinces`, nearByValidation, this.provinceController.getNearbyProvinces);
+    this.router.get(`${this.path}/pending/:id`, authorize(['admin', 'creator', 'auth']), this.provinceController.getPendingProvince);
+    this.router.post(`${this.path}/approve_update/:id`, authorize(['admin', 'auth']), this.provinceController.approveProvinceUpdate);
+    this.router.post(`${this.path}/approve/:id`, authorize(['admin', 'auth']), this.provinceController.approveProvince);
+    this.router.get(`${this.path}/nearby`, nearByValidation, this.provinceController.getNearbyProvinces);
     this.router.get(`${this.path}`, this.provinceController.getProvinces);
     this.router.get(`${this.path}/:id`, this.provinceController.getProvinceById);
   }

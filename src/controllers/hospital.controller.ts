@@ -6,6 +6,7 @@ import { NextFunction, Request, Response } from 'express';
 import { Result, validationResult } from 'express-validator';
 import fs from 'fs';
 import { ObjectId } from 'mongodb';
+import { RequestWithUser } from '@/interfaces/auth.interface';
 
 //interface for MuterRequset
 interface MulterRequest extends Request {
@@ -16,7 +17,7 @@ class HospitalController {
   public hospitalService = new HospitalService();
   public hospitalPndService = new HospitalPndService();
 
-  public getHospitals = async (req: Request, res: Response) => {
+  public getHospitals = async (req: RequestWithUser, res: Response) => {
     const page = parseInt(req.query.page as string) || 1;
     const per_page = parseInt(req.query.per_page as string) || 10;
     const search = req.query.search as string;
@@ -27,6 +28,10 @@ class HospitalController {
       status = true;
     } else if (req.query.status === 'false') {
       status = false;
+    }
+
+    if (!req.isAuth) {
+      status = true;
     }
     const province_id = req.query.province as string;
     const hasPending = req.query.hasPending === 'true' ? true : req.query.hasPending === 'false' ? false : undefined;
@@ -113,6 +118,7 @@ class HospitalController {
 
     try {
       const hospital = await this.hospitalService.findById(id, projectObj);
+      if (!hospital.status) return res.status(404).json({ message: 'hospital not found' });
       const imageAttached = attachImages([hospital], ['images']);
       res.status(200).json({ data: imageAttached[0], message: 'findOne' });
     } catch (error) {

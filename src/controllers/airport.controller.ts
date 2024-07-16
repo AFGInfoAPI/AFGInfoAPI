@@ -1,4 +1,5 @@
 import { AirportPnd } from '@/interfaces/airport.interface';
+import { RequestWithUser } from '@/interfaces/auth.interface';
 import AirportPndService from '@/services/airport.pend.service';
 import AirportService from '@/services/airport.service';
 import attachImages from '@/utils/helpers/attachImages';
@@ -16,7 +17,7 @@ class AirportController {
   public airportService = new AirportService();
   public airportPndService = new AirportPndService();
 
-  public getAirports = async (req: Request, res: Response) => {
+  public getAirports = async (req: RequestWithUser, res: Response) => {
     const page = parseInt(req.query.page as string) || 1;
     const per_page = parseInt(req.query.per_page as string) || 10;
     const search = req.query.search as string;
@@ -27,6 +28,10 @@ class AirportController {
       status = true;
     } else if (req.query.status === 'false') {
       status = false;
+    }
+
+    if (!req.isAuth) {
+      status = true;
     }
     const province_id = req.query.province as string;
     const hasPending = req.query.hasPending === 'true' ? true : req.query.hasPending === 'false' ? false : undefined;
@@ -105,6 +110,10 @@ class AirportController {
 
     try {
       const data = await this.airportService.findById(id, projectObj);
+
+      if (!data.status) {
+        return res.status(404).json({ message: 'airport not found' });
+      }
 
       const imageAttached = attachImages([data], ['images']);
       res.status(200).json({ data: imageAttached[0], message: 'findOne' });

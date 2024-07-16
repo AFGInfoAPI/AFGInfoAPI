@@ -6,6 +6,7 @@ import { validateFile } from '@/middlewares/filevalidator.middleware';
 import nearByValidation from '@/middlewares/nearby.validation.middleware';
 import authMiddleware from '@/middlewares/auth.middleware';
 import { HttpException } from '@/exceptions/HttpException';
+import authorize from '@/middlewares/authorize.middleware';
 
 class HotelRoute {
   public path = '/hotels';
@@ -46,19 +47,19 @@ class HotelRoute {
       .fill(0)
       .map((_, i) => ({ name: `images[${i}]` }));
 
-    uploadRouter.post('/', this.upload.fields(fields), createHotelValidation, this.hotelController.createHotel);
-    uploadRouter.patch('/:id', this.upload.fields(fields), createHotelValidation, this.hotelController.updateHotel);
-    uploadRouter.delete('/:id', this.hotelController.deleteHotel);
-    uploadRouter.patch('/:id/images', this.upload.fields(fields), this.hotelController.updteHotelImages);
-    uploadRouter.delete('/:id/images/:image_name', this.hotelController.deleteHotelImage);
+    uploadRouter.post('/', authorize(['admin', 'creator']), this.upload.fields(fields), createHotelValidation, this.hotelController.createHotel);
+    uploadRouter.patch('/:id', authorize(['admin', 'creator']), this.upload.fields(fields), createHotelValidation, this.hotelController.updateHotel);
+    uploadRouter.delete('/:id', authorize(['admin', 'auth']), this.hotelController.deleteHotel);
+    uploadRouter.patch('/:id/images', authorize(['admin', 'auth']), this.upload.fields(fields), this.hotelController.updteHotelImages);
+    uploadRouter.delete('/:id/images/:image_name', authorize(['admin', 'auth']), this.hotelController.deleteHotelImage);
 
     // Use the upload router without multer middleware
     this.router.use(`${this.path}`, uploadRouter);
 
-    this.router.get(`${this.path}/pending/:id`, this.hotelController.getPendingHotels);
-    this.router.post(`${this.path}/approve_update/:id`, this.hotelController.approveHotelPnd);
-    this.router.post(`${this.path}/approve/:id`, this.hotelController.approveHotel);
-    this.router.get(`${this.path}/nearbyHotels`, nearByValidation, this.hotelController.getNearbyHotels);
+    this.router.get(`${this.path}/pending/:id`, authorize(['admin', 'creator', 'auth']), this.hotelController.getPendingHotels);
+    this.router.post(`${this.path}/approve_update/:id`, authorize(['admin', 'auth']), this.hotelController.approveHotelPnd);
+    this.router.post(`${this.path}/approve/:id`, authorize(['admin', 'auth']), this.hotelController.approveHotel);
+    this.router.get(`${this.path}/nearby`, nearByValidation, this.hotelController.getNearbyHotels);
     this.router.get(`${this.path}/:id`, this.hotelController.getHotelById);
     this.router.get(`${this.path}`, this.hotelController.getHotels);
   }

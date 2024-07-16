@@ -1,4 +1,4 @@
-import { HttpException } from '@/exceptions/HttpException';
+import { RequestWithUser } from '@/interfaces/auth.interface';
 import { ProvincePnd } from '@/interfaces/province.interface';
 import ProvincePndService from '@/services/province.pend.service';
 import ProvinceService from '@/services/province.service';
@@ -16,7 +16,7 @@ class ProvinceController {
   public provinceService = new ProvinceService();
   public provincePndService = new ProvincePndService();
 
-  public getProvinces = async (req: Request, res: Response) => {
+  public getProvinces = async (req: RequestWithUser, res: Response) => {
     const page = parseInt(req.query.page as string) || 1;
     const per_page = parseInt(req.query.per_page as string) || 10;
     const search = req.query.search as string;
@@ -29,6 +29,12 @@ class ProvinceController {
     } else if (req.query.status === 'false') {
       status = false;
     }
+
+    // Check authentication status
+    if (!req.isAuth) {
+      status = true;
+    }
+
     // If req.query.status is neither 'true' nor 'false', status remains undefined
     const projectObj = lang
       ? {
@@ -89,7 +95,7 @@ class ProvinceController {
     }
   };
 
-  public getProvinceById = async (req: Request, res: Response, next: NextFunction) => {
+  public getProvinceById = async (req: RequestWithUser, res: Response, next: NextFunction) => {
     const id = req.params.id;
     const lang = req.query.lang as string;
     const projectObj = lang
@@ -112,6 +118,11 @@ class ProvinceController {
 
     try {
       const province = await this.provinceService.findById(id, projectObj);
+
+      if (!req.isAuth && province?.status === false) {
+        return res.status(404).json({ message: 'Not found' });
+      }
+
       const imageAttached = attachImages([province], ['images']);
 
       res.status(200).json({ data: imageAttached[0], message: 'findOne' });

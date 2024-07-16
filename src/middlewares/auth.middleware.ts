@@ -17,11 +17,17 @@ const authMiddleware = async (req: RequestWithUser, res: Response, next: NextFun
 
       if (findUser) {
         req.user = findUser;
+        req.isAuth = true;
         next();
       } else {
         next(new HttpException(401, 'Unauthenticated'));
       }
     } else {
+      if (req.method === 'GET' && !req.path.split('/').includes('pending')) {
+        req.isAuth = false;
+        next();
+        return;
+      }
       next(new HttpException(401, 'Unauthenticated'));
     }
   } catch (error) {

@@ -1,3 +1,4 @@
+import { RequestWithUser } from '@/interfaces/auth.interface';
 import { HotelPnd } from '@/interfaces/hotel.interface';
 import HotelPndService from '@/services/hotel.pend.service';
 import HotelService from '@/services/hotel.service';
@@ -16,13 +17,15 @@ class HotelPndController {
   public hotelPndService = new HotelPndService();
   public hotelService = new HotelService();
 
-  public getHotels = async (req: Request, res: Response) => {
+  public getHotels = async (req: RequestWithUser, res: Response) => {
     const page = parseInt(req.query.page as string) || 1;
     const per_page = parseInt(req.query.per_page as string) || 10;
     const search = req.query.search as string;
     const lang = req.query.lang as string;
     const searchFields = ['en_name', 'dr_name', 'ps_name', 'en_capital', 'dr_capital', 'ps_capital'];
-    const status = req.query.status === 'true' ? true : req.query.status === 'false' ? false : undefined;
+    let status = req.query.status === 'true' ? true : req.query.status === 'false' ? false : undefined;
+
+    if (!req.isAuth) status = true;
     const hasPending = req.query.hasPending === 'true' ? true : req.query.hasPending === 'false' ? false : undefined;
     const province_id = req.query.province as string;
     const projectObj = lang
@@ -110,6 +113,8 @@ class HotelPndController {
 
     try {
       const hotel = await this.hotelService.findById(id, projectObj);
+
+      if (!hotel.status) return res.status(404).json({ message: 'Hotel not found' });
 
       const imageAttached = attachImages([hotel], ['images']);
       res.status(200).json({ data: imageAttached[0], message: 'findOne' });

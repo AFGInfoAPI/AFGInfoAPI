@@ -1,3 +1,4 @@
+import { RequestWithUser } from '@/interfaces/auth.interface';
 import { DistrictPnd } from '@/interfaces/district.interface';
 import DistrictPndService from '@/services/district.pend.service';
 import DistrictService from '@/services/district.service';
@@ -16,7 +17,7 @@ class DistrictController {
   public districtService = new DistrictService();
   public districtPndService = new DistrictPndService();
 
-  public getDistricts = async (req: Request, res: Response) => {
+  public getDistricts = async (req: RequestWithUser, res: Response) => {
     const page = parseInt(req.query.page as string) || 1;
     const per_page = parseInt(req.query.per_page as string) || 10;
     const search = req.query.search as string;
@@ -27,6 +28,10 @@ class DistrictController {
       status = true;
     } else if (req.query.status === 'false') {
       status = false;
+    }
+
+    if (!req.isAuth) {
+      status = true;
     }
     const province_id = req.query.province as string;
     const hasPending = req.query.hasPending === 'true' ? true : req.query.hasPending === 'false' ? false : undefined;
@@ -115,6 +120,10 @@ class DistrictController {
 
     try {
       const data = await this.districtService.findById(id, projectObj);
+
+      if (!data.status) {
+        return res.status(404).json({ message: 'District not found' });
+      }
 
       const imageAttached = attachImages([data], ['images']);
       res.status(200).json({ data: imageAttached[0], message: 'findOne' });
