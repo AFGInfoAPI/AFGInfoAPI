@@ -15,7 +15,6 @@ validateEnv();
 
 const app = new App([
   new IndexRoute(),
-  new UsersRoute(),
   new AuthRoute(),
   new ProvinceRoute(),
   new DistrictRoute(),
@@ -24,6 +23,7 @@ const app = new App([
   new HotelRoute(),
   new ParkRoute(),
   new HospitalRoute(),
+  new UsersRoute(),
 ]);
 
 app.listen();
