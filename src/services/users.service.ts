@@ -8,8 +8,25 @@ import { isEmpty } from '@utils/util';
 class UserService {
   public users = userModel;
 
-  public async findAllUser(): Promise<User[]> {
-    const users: User[] = await this.users.find();
+  public async findAllUser(query: any): Promise<User[]> {
+    const dbQuery: any = {};
+
+    if (query.search) {
+      const searchQuery = query.search;
+      dbQuery.$or = [
+        { email: new RegExp(searchQuery, 'i') }, // Case-insensitive regex search
+      ];
+    }
+
+    Object.keys(query).forEach(key => {
+      if (key !== 'search' && query[key]) {
+        dbQuery[key] = query[key];
+      }
+    });
+
+    console.log('Database Query:', dbQuery);
+
+    const users: User[] = await this.users.find(dbQuery);
     return users;
   }
 

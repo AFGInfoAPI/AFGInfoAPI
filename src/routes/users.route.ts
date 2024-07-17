@@ -5,15 +5,18 @@ import { Routes } from '@interfaces/routes.interface';
 import validationMiddleware from '@middlewares/validation.middleware';
 import authMiddleware from '@/middlewares/auth.middleware';
 import authorize from '@/middlewares/authorize.middleware';
+import multer from 'multer';
 
 class UsersRoute implements Routes {
   public path = '/users';
   public router = Router();
   public usersController = new UsersController();
+  private multer = multer();
 
   constructor() {
     this.router.use(authMiddleware);
     this.router.use(authorize(['admin']));
+    this.router.use(this.multer.none());
     this.initializeRoutes();
   }
 
