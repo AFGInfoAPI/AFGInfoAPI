@@ -64,7 +64,7 @@ class UserService {
       userData = { ...userData, password: hashedPassword };
     }
 
-    const updateUserById: User = await this.users.findByIdAndUpdate(userId, { userData });
+    const updateUserById: User = await this.users.findByIdAndUpdate(userId, userData, { new: true });
     if (!updateUserById) throw new HttpException(409, "User doesn't exist");
 
     return updateUserById;
@@ -75,6 +75,13 @@ class UserService {
     if (!deleteUserById) throw new HttpException(409, "User doesn't exist");
 
     return deleteUserById;
+  }
+
+  public async change_role(userId: string, role: string): Promise<User> {
+    const updateUserById: User = await this.users.findByIdAndUpdate(userId, { role: role });
+    if (!updateUserById) throw new HttpException(409, "User doesn't exist");
+
+    return updateUserById;
   }
 }
 

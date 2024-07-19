@@ -11,6 +11,12 @@ class UsersController {
     try {
       const findAllUsersData: User[] = await this.userService.findAllUser(query);
 
+      findAllUsersData.map(user => {
+        user.password = undefined;
+      });
+
+      console.log(findAllUsersData, 'findAllUsersData===================');
+
       res.status(200).json({ data: findAllUsersData, message: 'findAll' });
     } catch (error) {
       next(error);
@@ -21,6 +27,7 @@ class UsersController {
     try {
       const userId: string = req.params.id;
       const findOneUserData: User = await this.userService.findUserById(userId);
+      findOneUserData.password = undefined;
 
       res.status(200).json({ data: findOneUserData, message: 'findOne' });
     } catch (error) {
@@ -44,6 +51,7 @@ class UsersController {
     try {
       const userId: string = req.params.id;
       const userData: CreateUserDto = req.body;
+      console.log(userData, 'userData===================');
       const updateUserData: User = await this.userService.updateUser(userId, userData);
 
       res.status(200).json({ data: updateUserData, message: 'updated' });
@@ -58,6 +66,18 @@ class UsersController {
       const deleteUserData: User = await this.userService.deleteUser(userId);
 
       res.status(200).json({ data: deleteUserData, message: 'deleted' });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public change_role = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const userId: string = req.params.id;
+      const role: string = req.body.role;
+      const updateUserData: User = await this.userService.change_role(userId, role);
+
+      res.status(200).json({ data: updateUserData, message: 'updated' });
     } catch (error) {
       next(error);
     }
