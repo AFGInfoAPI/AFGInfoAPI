@@ -62,8 +62,8 @@ class ProvinceRoute {
       this.provinceController.updateProvince,
     );
     uploadRouter.delete('/:id', authorize(['admin']), this.provinceController.deleteProvince);
-    uploadRouter.patch('/:id/images', authorize(['admin', 'creator']), this.upload.fields(fields), this.provinceController.updateProvinceImages);
-    uploadRouter.delete('/:id/images/:image_name', authorize(['admin', 'creator']), this.provinceController.deleteProvinceImage);
+    uploadRouter.patch('/:id/images', authorize(['admin', 'auth']), this.upload.fields(fields), this.provinceController.updateProvinceImages);
+    uploadRouter.delete('/:id/images/:image_name', authorize(['admin', 'auth']), this.provinceController.deleteProvinceImage);
 
     // Use the upload router without multer middleware
     this.router.use(`${this.path}`, uploadRouter);
