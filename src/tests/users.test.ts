@@ -1,137 +1,54 @@
-import bcrypt from 'bcrypt';
-import mongoose from 'mongoose';
-import request from 'supertest';
-import App from '@/app';
-import { CreateUserDto } from '@dtos/users.dto';
-import UsersRoute from '@routes/users.route';
+// user.test.js
+const User = require('../data/user'); // Adjust the path if needed
 
-beforeAll(async () => {
-  jest.setTimeout(10000);
-});
-afterAll(async () => {
-  await new Promise<void>(resolve => setTimeout(() => resolve(), 500));
-});
-
-describe('Testing Users', () => {
-  describe('[GET] /users', () => {
-    it('response findAll Users', async () => {
-      const usersRoute = new UsersRoute();
-      const users = usersRoute.usersController.userService.users;
-
-      users.find = jest.fn().mockReturnValue([
-        {
-          _id: 'qpwoeiruty',
-          email: 'a@email.com',
-          password: await bcrypt.hash('q1w2e3r4!', 10),
-        },
-        {
-          _id: 'alskdjfhg',
-          email: 'b@email.com',
-          password: await bcrypt.hash('a1s2d3f4!', 10),
-        },
-        {
-          _id: 'zmxncbv',
-          email: 'c@email.com',
-          password: await bcrypt.hash('z1x2c3v4!', 10),
-        },
-      ]);
-
-      (mongoose as any).connect = jest.fn();
-      const app = new App([usersRoute]);
-
-      return request(app.getServer()).get(`${usersRoute.path}`).expect(200);
-    });
+describe('User Model', () => {
+  it('should create a user with name, email, and password', () => {
+    const user = new User('John Doe', 'john@example.com', '123456');
+    expect(user.name).toEqual('John Doe');
+    expect(user.email).toEqual('john@example.com');
+    expect(user.password).toEqual('123456');
   });
 
-  describe('[GET] /users/:id', () => {
-    it('response findOne User', async () => {
-      const userId = 'qpwoeiruty';
-
-      const usersRoute = new UsersRoute();
-      const users = usersRoute.usersController.userService.users;
-
-      users.findOne = jest.fn().mockReturnValue({
-        _id: 'qpwoeiruty',
-        email: 'a@email.com',
-        password: await bcrypt.hash('q1w2e3r4!', 10),
-      });
-
-      (mongoose as any).connect = jest.fn();
-      const app = new App([usersRoute]);
-      return request(app.getServer()).get(`${usersRoute.path}/${userId}`).expect(200);
-    });
+  it('should validate email correctly', () => {
+    expect(User.validateEmail('john@example.com')).toBeTruthy();
+    expect(User.validateEmail('johnexample.com')).toBeFalsy();
   });
 
-  describe('[POST] /users', () => {
-    it('response Create User', async () => {
-      const userData: CreateUserDto = {
-        email: 'test@email.com',
-        password: 'q1w2e3r4',
-      };
-
-      const usersRoute = new UsersRoute();
-      const users = usersRoute.usersController.userService.users;
-
-      users.findOne = jest.fn().mockReturnValue(null);
-      users.create = jest.fn().mockReturnValue({
-        _id: '60706478aad6c9ad19a31c84',
-        email: userData.email,
-        password: await bcrypt.hash(userData.password, 10),
-      });
-
-      (mongoose as any).connect = jest.fn();
-      const app = new App([usersRoute]);
-      return request(app.getServer()).post(`${usersRoute.path}`).send(userData).expect(201);
-    });
+  it('should return true for valid user', () => {
+    const user = new User('John Doe', 'john@example.com', '123456');
+    expect(user.isValid()).toBeTruthy();
   });
 
-  describe('[PUT] /users/:id', () => {
-    it('response Update User', async () => {
-      const userId = '60706478aad6c9ad19a31c84';
-      const userData: CreateUserDto = {
-        email: 'test@email.com',
-        password: 'q1w2e3r4',
-      };
-
-      const usersRoute = new UsersRoute();
-      const users = usersRoute.usersController.userService.users;
-
-      if (userData.email) {
-        users.findOne = jest.fn().mockReturnValue({
-          _id: userId,
-          email: userData.email,
-          password: await bcrypt.hash(userData.password, 10),
-        });
-      }
-
-      users.findByIdAndUpdate = jest.fn().mockReturnValue({
-        _id: userId,
-        email: userData.email,
-        password: await bcrypt.hash(userData.password, 10),
-      });
-
-      (mongoose as any).connect = jest.fn();
-      const app = new App([usersRoute]);
-      return request(app.getServer()).put(`${usersRoute.path}/${userId}`).send(userData);
-    });
+  it('should return false for invalid user', () => {
+    const user = new User('John Doe', '', '123456');
+    expect(user.isValid()).toBeFalsy();
   });
 
-  describe('[DELETE] /users/:id', () => {
-    it('response Delete User', async () => {
-      const userId = '60706478aad6c9ad19a31c84';
+  it('should create a user without password and fail validation', () => {
+    const user = new User('Jane Doe', 'jane@example.com', '');
+    expect(user.isValid()).toBeFalsy();
+  });
 
-      const usersRoute = new UsersRoute();
-      const users = usersRoute.usersController.userService.users;
+  it('should create a user with an invalid email and fail validation', () => {
+    const user = new User('Jane Doe', 'janeexample.com', '123456');
+    expect(User.validateEmail(user.email)).toBeFalsy();
+  });
 
-      users.findByIdAndDelete = jest.fn().mockReturnValue({
-        _id: '60706478aad6c9ad19a31c84',
-        email: 'test@email.com',
-        password: await bcrypt.hash('q1w2e3r4!', 10),
-      });
+  it('should handle edge cases with missing name, email, and password', () => {
+    const user = new User('', '', '');
+    expect(user.isValid()).toBeFalsy();
+    expect(User.validateEmail(user.email)).toBeFalsy();
+  });
 
-      (mongoose as any).connect = jest.fn();
-      const app = new App([usersRoute]);
-      return request(app.getServer()).delete(`${usersRoute.path}/${userId}`).expect(200);
-    });
+  it('should handle edge case with null values', () => {
+    const user = new User(null, null, null);
+    expect(user.isValid()).toBeFalsy();
+    expect(User.validateEmail(user.email)).toBeFalsy();
+  });
+
+  it('should handle edge case with undefined values', () => {
+    const user = new User(undefined, undefined, undefined);
+    expect(user.isValid()).toBeFalsy();
+    expect(User.validateEmail(user.email)).toBeFalsy();
   });
 });
