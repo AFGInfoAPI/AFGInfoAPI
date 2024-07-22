@@ -23,7 +23,7 @@ const authMiddleware = async (req: RequestWithUser, res: Response, next: NextFun
         next(new HttpException(401, 'Unauthenticated'));
       }
     } else {
-      if (req.method === 'GET' && !req.path.split('/').includes('pending')) {
+      if (req.method === 'GET' && !req.path.split('/').includes('pending') && !req.path.split('/').includes('users')) {
         req.isAuth = false;
         next();
         return;

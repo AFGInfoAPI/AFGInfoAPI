@@ -25,9 +25,9 @@ class App {
     this.port = PORT || 3000;
 
     this.connectToDatabase();
+    this.initializeSwagger();
     this.initializeMiddlewares();
     this.initializeRoutes(routes);
-    this.initializeSwagger();
     this.initializeErrorHandling();
   }
 
@@ -87,14 +87,32 @@ class App {
           version: '1.0.0',
           description: 'Example docs',
         },
+        schemes: ['http'],
+        securityDefinitions: {
+          Bearer: {
+            type: 'apiKey',
+            name: 'Authorization',
+            in: 'header',
+          },
+        },
+        security: [
+          {
+            Bearer: [],
+          },
+        ],
       },
-      apis: ['swagger.yaml'],
+      apis: ['swagger.yaml'], // Path to the API docs
     };
 
+    const swaggerUiOptions = {
+      explorer: true,
+      swaggerOptions: {
+        supportedSubmitMethods: [], // This disables the "Try it out" button
+      },
+    };
     const specs = swaggerJSDoc(options);
-    this.app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
+    this.app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs, swaggerUiOptions));
   }
-
   private initializeErrorHandling() {
     this.app.use(errorMiddleware);
   }

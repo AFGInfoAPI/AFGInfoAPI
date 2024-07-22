@@ -1,32 +1,38 @@
-tags:
-- name: users
-  description: users API
-
+swagger: '2.0'
+info:
+  version: '1.0.0'
+  title: 'Provinces API'
+  description: 'API for managing provinces'
+host: 'api.example.com'
+schemes:
+  - 'https'
+  - 'http'
 paths:
-# [GET] users
   /users:
     get:
+      security:
+        - Bearer: []
       tags:
-      - users
+        - users
       summary: Find All Users
       responses:
         200:
           description: 'OK'
         500:
           description: 'Server Error'
-
-# [POST] users
     post:
+      security:
+        - Bearer: []
       tags:
-      - users
+        - users
       summary: Add User
       parameters:
-      - name: body
-        in: body
-        description: user Data
-        required: true
-        schema:
-          $ref: '#/definitions/users'
+        - name: body
+          in: body
+          description: user Data
+          required: true
+          schema:
+            $ref: '#/definitions/User'
       responses:
         201:
           description: 'Created'
@@ -36,18 +42,19 @@ paths:
           description: 'Conflict'
         500:
           description: 'Server Error'
-
-# [GET] users/id
   /users/{id}:
     get:
+      security:
+        - Bearer: []
       tags:
-      - users
+        - users
       summary: Find User By Id
       parameters:
-      - name: id
-        in: path
-        description: User Id
-        required: true
+        - name: id
+          in: path
+          description: User Id
+          required: true
+          type: string
       responses:
         200:
           description: 'OK'
@@ -55,23 +62,24 @@ paths:
           description: 'Conflict'
         500:
           description: 'Server Error'
-
-# [PUT] users/id
-    put:
+    patch:
+      security:
+        - Bearer: []
       tags:
-      - users
+        - users
       summary: Update User By Id
       parameters:
-      - name: id
-        in: path
-        description: user Id
-        required: true
-      - name: body
-        in: body
-        description: user Data
-        required: true
-        schema:
-          $ref: '#/definitions/users'
+        - name: id
+          in: path
+          description: user Id
+          required: true
+          type: string
+        - name: body
+          in: body
+          description: user Data
+          required: true
+          schema:
+            $ref: '#/definitions/User'
       responses:
         200:
           description: 'OK'
@@ -81,17 +89,18 @@ paths:
           description: 'Conflict'
         500:
           description: 'Server Error'
-
-# [DELETE] users/id
     delete:
+      security:
+        - Bearer: []
       tags:
-      - users
+        - users
       summary: Delete User By Id
       parameters:
-      - name: id
-        in: path
-        description: user Id
-        required: true
+        - name: id
+          in: path
+          description: user Id
+          required: true
+          type: string
       responses:
         200:
           description: 'OK'
@@ -99,22 +108,628 @@ paths:
           description: 'Conflict'
         500:
           description: 'Server Error'
-
-# definitions
+  /provinces:
+    get:
+      summary: Get all provinces
+      tags:
+        - Provinces
+      parameters:
+        - name: lang
+          in: query
+          type: string
+          enum:
+            - en
+            - dr
+            - ps
+          required: false
+          description: Language for the response
+        - name: per_page
+          in: query
+          type: integer
+          required: false
+          description: Number of provinces per page
+        - name: page
+          in: query
+          type: integer
+          required: false
+          description: Page number
+        - name: search
+          in: query
+          type: string
+          required: false
+          description: Search term
+        - name: status
+          in: query
+          type: string
+          required: false
+          description: Province status
+        - name: hasPending
+          in: query
+          type: boolean
+          required: false
+          description: Filter provinces with pending updates
+      responses:
+        '200':
+          description: A list of provinces
+        400:
+          description: 'Bad Request'
+        500:
+          description: 'Server Error'
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Province'
+    post:
+      summary: Create a new province
+      tags:
+        - Provinces
+      security:
+        - Bearer: []
+      parameters:
+        - name: body
+          in: body
+          description: Province data
+          required: true
+          schema:
+            type: object
+            properties:
+              images:
+                type: array
+                items:
+                  type: string
+                  format: binary
+              name:
+                type: string
+            required:
+              - name
+      responses:
+        '201':
+          description: Province created successfully
+          schema:
+            $ref: '#/definitions/Province'
+  /provinces/{id}:
+    get:
+      summary: Get a province by ID
+      tags:
+        - Provinces
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+      responses:
+        '200':
+          description: A single province
+          schema:
+            $ref: '#/definitions/Province'
+    patch:
+      summary: Update a province
+      tags:
+        - Provinces
+      security:
+        - Bearer: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          description: Province data
+          required: true
+          schema:
+            type: object
+            properties:
+              images:
+                type: array
+                items:
+                  type: string
+                  format: binary
+              name:
+                type: string
+      responses:
+        '200':
+          description: Province updated successfully
+          schema:
+            $ref: '#/definitions/Province'
+    delete:
+      summary: Delete a province
+      tags:
+        - Provinces
+      security:
+        - Bearer: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Province deleted successfully
+  /provinces/{id}/images:
+    patch:
+      summary: Update province images
+      tags:
+        - Provinces
+      security:
+        - Bearer: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          description: Images data
+          required: true
+          schema:
+            type: object
+            properties:
+              images:
+                type: array
+                items:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: Province images updated successfully
+          schema:
+            $ref: '#/definitions/Province'
+  /provinces/{id}/images/{image_name}:
+    delete:
+      summary: Delete a specific image from a province
+      tags:
+        - Provinces
+      security:
+        - Bearer: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+        - name: image_name
+          in: path
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Image deleted successfully
+  /provinces/pending/{id}:
+    get:
+      summary: Get a pending province by ID
+      tags:
+        - Provinces
+      security:
+        - Bearer: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+      responses:
+        '200':
+          description: A pending province
+          schema:
+            $ref: '#/definitions/Province'
+  /provinces/approve_update/{id}:
+    post:
+      summary: Approve an update to a province
+      tags:
+        - Provinces
+      security:
+        - Bearer: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Province update approved
+  /provinces/approve/{id}:
+    post:
+      summary: Approve a province
+      tags:
+        - Provinces
+      security:
+        - Bearer: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Province approved
+  /provinces/nearby:
+    get:
+      summary: Get nearby provinces
+      tags:
+        - Provinces
+      parameters:
+        - name: latitude
+          in: query
+          required: true
+          type: number
+        - name: longitude
+          in: query
+          required: true
+          type: number
+      responses:
+        '200':
+          description: A list of nearby provinces
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Province'
 definitions:
-  users:
+  User:
     type: object
-    required:
-        - email
-        - password
     properties:
+      id:
+        type: string
+      name:
+        type: string
       email:
         type: string
-        description: user Email
-      password:
+      role:
         type: string
-        description: user Password
-
-schemes:
- - https
- - http
+        enum:
+          - admin
+          - auth
+          - creator
+  Province:
+    type: object
+    properties:
+      _id:
+        type: string
+      en_name:
+        type: string
+      dr_name:
+        type: string
+      ps_name:
+        type: string
+      en_capital:
+        type: string
+      dr_capital:
+        type: string
+      ps_capital:
+        type: string
+      area:
+        type: number
+      population:
+        type: number
+      gdp:
+        type: number
+      location:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+              - Point
+          coordinates:
+            type: array
+            items:
+              type: number
+      googleMapUrl:
+        type: string
+      en_description:
+        type: string
+      dr_description:
+        type: string
+      ps_description:
+        type: string
+      images:
+        type: array
+        items:
+          type: string
+      status:
+        type: boolean
+      hasPending:
+        type: boolean
+      airports:
+        type: array
+        items:
+          $ref: '#/definitions/Airports'
+      districts:
+        type: array
+        items:
+          $ref: '#/definitions/Districs'
+      hospitals:
+        type: array
+        items:
+          $ref: '#/definitions/Hospitals'
+      hotels:
+        type: array
+        items:
+          $ref: '#/definitions/Hotels'
+      parks:
+        type: array
+        items:
+          $ref: '#/definitions/Parks'
+      touristicPlaces:
+        type: array
+        items:
+          $ref: '#/definitions/TouristicPlaces'
+  Districs:
+    type: object
+    properties:
+      _id:
+        type: string
+      en_name:
+        type: string
+      dr_name:
+        type: string
+      ps_name:
+        type: string
+      en_capital:
+        type: string
+      dr_capital:
+        type: string
+      ps_capital:
+        type: string
+      area:
+        type: number
+      population:
+        type: number
+      gdp:
+        type: number
+      location:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+              - Point
+          coordinates:
+            type: array
+            items:
+              type: number
+      googleMapUrl:
+        type: string
+      en_description:
+        type: string
+      dr_description:
+        type: string
+      ps_description:
+        type: string
+      images:
+        type: array
+        items:
+          type: string
+      province_id:
+        type: string
+      status:
+        type: boolean
+      hasPending:
+        type: boolean
+  Airports:
+    type: object
+    properties:
+      _id:
+        type: string
+      en_name:
+        type: string
+      dr_name:
+        type: string
+      ps_name:
+        type: string
+      en_city:
+        type: string
+      dr_city:
+        type: string
+      ps_city:
+        type: string
+      iata_code:
+        type: string
+      googleMapUrl:
+        type: string
+      number_of_terminals:
+        type: integer
+      location:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+              - Point
+          coordinates:
+            type: array
+            items:
+              type: number
+      status:
+        type: boolean
+      images:
+        type: array
+        items:
+          type: string
+      hasPending:
+        type: boolean
+      province_id:
+        type: string
+  Hospitals:
+    type: object
+    properties:
+      _id:
+        type: string
+      en_name:
+        type: string
+      dr_name:
+        type: string
+      ps_name:
+        type: string
+      en_address:
+        type: string
+      dr_address:
+        type: string
+      ps_address:
+        type: string
+      phone:
+        type: string
+      ambulancePhone:
+        type: string
+      email:
+        type: string
+      website:
+        type: string
+      numberOfBeds:
+        type: integer
+      images:
+        type: array
+        items:
+          type: string
+      location:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+              - Point
+          coordinates:
+            type: array
+            items:
+              type: number
+      googleMapUrl:
+        type: string
+      province_id:
+        type: string
+      hasPending:
+        type: boolean
+      status:
+        type: boolean
+  Hotels:
+    type: object
+    properties:
+      _id:
+        type: string
+      en_name:
+        type: string
+      dr_name:
+        type: string
+      ps_name:
+        type: string
+      en_description:
+        type: string
+      dr_description:
+        type: string
+      ps_description:
+        type: string
+      en_address:
+        type: string
+      dr_address:
+        type: string
+      ps_address:
+        type: string
+      email:
+        type: string
+      phone:
+        type: string
+      website:
+        type: string
+      rating:
+        type: number
+      images:
+        type: array
+        items:
+          type: string
+      status:
+        type: boolean
+      province_id:
+        type: string
+      location:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+              - Point
+          coordinates:
+            type: array
+            items:
+              type: number
+      googleMapUrl:
+        type: string
+      hasPending:
+        type: boolean
+  Parks:
+    type: object
+    properties:
+      _id:
+        type: string
+      en_name:
+        type: string
+      dr_name:
+        type: string
+      ps_name:
+        type: string
+      location:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+              - Point
+          coordinates:
+            type: array
+            items:
+              type: number
+      googleMapUrl:
+        type: string
+      status:
+        type: boolean
+      images:
+        type: array
+        items:
+          type: string
+      hasPending:
+        type: boolean
+      province_id:
+        type: string
+  TouristicPlaces:
+    type: object
+    properties:
+      _id:
+        type: string
+      en_name:
+        type: string
+      dr_name:
+        type: string
+      ps_name:
+        type: string
+      en_description:
+        type: string
+      dr_description:
+        type: string
+      ps_description:
+        type: string
+      isNationalPark:
+        type: boolean
+      location:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+              - Point
+          coordinates:
+            type: array
+            items:
+              type: number
+      googleMapUrl:
+        type: string
+      province_id:
+        type: string
+      images:
+        type: array
+        items:
+          type: string
+      status:
+        type: boolean
+      hasPending:
+        type: boolean
+securityDefinitions:
+  Bearer:
+    type: apiKey
+    name: Authorization
+    in: header
