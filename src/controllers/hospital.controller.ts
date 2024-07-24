@@ -95,7 +95,7 @@ class HospitalController {
     }
   };
 
-  public getHospitalById = async (req: Request, res: Response, next: NextFunction) => {
+  public getHospitalById = async (req: RequestWithUser, res: Response, next: NextFunction) => {
     const id = req.params.id;
     const lang = req.query.lang as string;
     const projectObj = lang
@@ -118,7 +118,7 @@ class HospitalController {
 
     try {
       const hospital = await this.hospitalService.findById(id, projectObj);
-      if (!hospital.status) return res.status(404).json({ message: 'hospital not found' });
+      if (!hospital.status && !req.isAuth) return res.status(404).json({ message: 'hospital not found' });
       const imageAttached = attachImages([hospital], ['images']);
       res.status(200).json({ data: imageAttached[0], message: 'findOne' });
     } catch (error) {

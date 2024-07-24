@@ -97,7 +97,7 @@ class DistrictController {
     }
   };
 
-  public getDistrictById = async (req: Request, res: Response, next: NextFunction) => {
+  public getDistrictById = async (req: RequestWithUser, res: Response, next: NextFunction) => {
     const id = req.params.id;
     const lang = req.query.lang as string;
     const projectObj = lang
@@ -121,7 +121,7 @@ class DistrictController {
     try {
       const data = await this.districtService.findById(id, projectObj);
 
-      if (!data.status) {
+      if (!data.status && !req.isAuth) {
         return res.status(404).json({ message: 'District not found' });
       }
 

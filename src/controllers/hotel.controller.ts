@@ -90,7 +90,7 @@ class HotelPndController {
     }
   };
 
-  public getHotelById = async (req: Request, res: Response, next: NextFunction) => {
+  public getHotelById = async (req: RequestWithUser, res: Response, next: NextFunction) => {
     const id = req.params.id;
     const lang = req.query.lang as string;
     const projectObj = lang
@@ -114,7 +114,7 @@ class HotelPndController {
     try {
       const hotel = await this.hotelService.findById(id, projectObj);
 
-      if (!hotel.status) return res.status(404).json({ message: 'Hotel not found' });
+      if (!hotel.status && !req.isAuth) return res.status(404).json({ message: 'Hotel not found' });
 
       const imageAttached = attachImages([hotel], ['images']);
       res.status(200).json({ data: imageAttached[0], message: 'findOne' });

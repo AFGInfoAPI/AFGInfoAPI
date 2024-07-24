@@ -88,7 +88,7 @@ class TouristicPlaceController {
     }
   };
 
-  public getTouristicPlaceById = async (req: Request, res: Response, next: NextFunction) => {
+  public getTouristicPlaceById = async (req: RequestWithUser, res: Response, next: NextFunction) => {
     const id = req.params.id;
     const lang = req.query.lang as string;
     const projectObj = lang
@@ -107,7 +107,7 @@ class TouristicPlaceController {
 
     try {
       const touristicplace = await this.touristicPlaceService.findById(id, projectObj);
-      if (!touristicplace.status) {
+      if (!touristicplace.status && !req.isAuth) {
         return res.status(404).json({ message: 'not found' });
       }
       const imageAttached = attachImages([touristicplace], ['images']);

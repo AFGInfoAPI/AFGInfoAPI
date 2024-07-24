@@ -90,7 +90,7 @@ class AirportController {
     }
   };
 
-  public getAirportById = async (req: Request, res: Response, next: NextFunction) => {
+  public getAirportById = async (req: RequestWithUser, res: Response, next: NextFunction) => {
     const id = req.params.id;
     const lang = req.query.lang as string;
     const projectObj = lang
@@ -111,7 +111,7 @@ class AirportController {
     try {
       const data = await this.airportService.findById(id, projectObj);
 
-      if (!data.status) {
+      if (!data.status && !req.isAuth) {
         return res.status(404).json({ message: 'airport not found' });
       }
 

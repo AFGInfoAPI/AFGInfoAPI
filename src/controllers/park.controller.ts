@@ -93,7 +93,7 @@ class ParkController {
     }
   };
 
-  public getParkById = async (req: Request, res: Response, next: NextFunction) => {
+  public getParkById = async (req: RequestWithUser, res: Response, next: NextFunction) => {
     const id = req.params.id;
     const lang = req.query.lang as string;
     const projectObj = lang
@@ -111,7 +111,7 @@ class ParkController {
     try {
       const data = await this.parkService.findById(id, projectObj);
 
-      if (!data.status) return res.status(404).json({ message: 'park not found' });
+      if (!data.status && req.isAuth) return res.status(404).json({ message: 'park not found' });
       const imageAttached = attachImages([data], ['images']);
       res.status(200).json({ data: imageAttached[0], message: 'findOne' });
     } catch (error) {
