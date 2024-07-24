@@ -362,6 +362,1276 @@ paths:
             type: array
             items:
               $ref: '#/definitions/Province'
+  /districts:
+    get:
+      summary: Get all districts
+      tags:
+        - Districts
+      parameters:
+        - name: lang
+          in: query
+          type: string
+          enum:
+            - en
+            - dr
+            - ps
+          required: false
+          description: Language for the response
+        - name: per_page
+          in: query
+          type: integer
+          required: false
+          description: Number of districts per page
+        - name: page
+          in: query
+          type: integer
+          required: false
+          description: Page number
+        - name: search
+          in: query
+          type: string
+          required: false
+          description: Search term
+        - name: status
+          in: query
+          type: string
+          required: false
+          description: District status
+        - name: hasPending
+          in: query
+          type: boolean
+          required: false
+          description: Filter districts with pending updates
+      responses:
+        '200':
+          description: A list of districts
+        400:
+          description: 'Bad Request'
+        500:
+          description: 'Server Error'
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Districts'
+    post:
+      summary: Create a new district
+      tags:
+        - Districts
+      security:
+        - Bearer: []
+      parameters:
+        - name: body
+          in: body
+          description: District data
+          required: true
+          schema:
+            type: object
+            properties:
+              images:
+                type: array
+                items:
+                  type: string
+                  format: binary
+              name:
+                type: string
+            required:
+              - name
+      responses:
+        '201':
+          description: District created successfully
+          schema:
+            $ref: '#/definitions/Districts'
+  /districts/{id}:
+    get:
+      summary: Get a district by ID
+      tags:
+        - Districts
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+      responses:
+        '200':
+          description: A single district
+          schema:
+            $ref: '#/definitions/Districts'
+    patch:
+      summary: Update a district
+      tags:
+        - Districts
+      security:
+        - Bearer: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          description: District data
+          required: true
+          schema:
+            type: object
+            properties:
+              images:
+                type: array
+                items:
+                  type: string
+                  format: binary
+              name:
+                type: string
+      responses:
+        '200':
+          description: District updated successfully
+          schema:
+            $ref: '#/definitions/Districts'
+    delete:
+      summary: Delete a district
+      tags:
+        - Districts
+      security:
+        - Bearer: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+      responses:
+        '200':
+          description: District deleted successfully
+  /districts/{id}/images:
+    patch:
+      summary: Update district images
+      tags:
+        - Districts
+      security:
+        - Bearer: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          description: Images data
+          required: true
+          schema:
+            type: object
+            properties:
+              images:
+                type: array
+                items:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: District images updated successfully
+          schema:
+            $ref: '#/definitions/Districts'
+  /districts/{id}/images/{image_name}:
+    delete:
+      summary: Delete a specific image from a district
+      tags:
+        - Districts
+      security:
+        - Bearer: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+        - name: image_name
+          in: path
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Image deleted successfully
+  /districts/pending/{id}:
+    get:
+      summary: Get a pending district by ID
+      tags:
+        - Districts
+      security:
+        - Bearer: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+      responses:
+        '200':
+          description: A pending district
+          schema:
+            $ref: '#/definitions/Districts'
+  /districts/approve_update/{id}:
+    post:
+      summary: Approve an update to a district
+      tags:
+        - Districts
+      security:
+        - Bearer: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+      responses:
+        '200':
+          description: District update approved
+  /districts/approve/{id}:
+    post:
+      summary: Approve a district
+      tags:
+        - Districts
+      security:
+        - Bearer: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+      responses:
+        '200':
+          description: District approved
+  /districts/nearby:
+    get:
+      summary: Get nearby districts
+      tags:
+        - Districts
+      parameters:
+        - name: latitude
+          in: query
+          required: true
+          type: number
+        - name: longitude
+          in: query
+          required: true
+          type: number
+      responses:
+        '200':
+          description: A list of nearby districts
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Districts'
+  /airports:
+    get:
+      summary: Get all airports
+      tags:
+        - Airports
+      parameters:
+        - name: lang
+          in: query
+          type: string
+          enum:
+            - en
+            - dr
+            - ps
+          required: false
+          description: Language for the response
+        - name: per_page
+          in: query
+          type: integer
+          required: false
+          description: Number of airports per page
+        - name: page
+          in: query
+          type: integer
+          required: false
+          description: Page number
+        - name: search
+          in: query
+          type: string
+          required: false
+          description: Search term
+        - name: status
+          in: query
+          type: string
+          required: false
+          description: Airport status
+        - name: hasPending
+          in: query
+          type: boolean
+          required: false
+          description: Filter airports with pending updates
+      responses:
+        '200':
+          description: A list of airports
+        400:
+          description: 'Bad Request'
+        500:
+          description: 'Server Error'
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Airports'
+    post:
+      summary: Create a new airport
+      tags:
+        - Airports
+      security:
+        - Bearer: []
+      parameters:
+        - name: body
+          in: body
+          description: Airport data
+          required: true
+          schema:
+            type: object
+            properties:
+              images:
+                type: array
+                items:
+                  type: string
+                  format: binary
+              name:
+                type: string
+            required:
+              - name
+      responses:
+        '201':
+          description: Airport created successfully
+          schema:
+            $ref: '#/definitions/Airports'
+  /airports/{id}:
+    get:
+      summary: Get an airport by ID
+      tags:
+        - Airports
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+      responses:
+        '200':
+          description: A single airport
+          schema:
+            $ref: '#/definitions/Airports'
+    patch:
+      summary: Update an airport
+      tags:
+        - Airports
+      security:
+        - Bearer: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          description: Airport data
+          required: true
+          schema:
+            type: object
+            properties:
+              images:
+                type: array
+                items:
+                  type: string
+                  format: binary
+              name:
+                type: string
+      responses:
+        '200':
+          description: Airport updated successfully
+          schema:
+            $ref: '#/definitions/Airports'
+    delete:
+      summary: Delete an airport
+      tags:
+        - Airports
+      security:
+        - Bearer: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Airport deleted successfully
+  /airports/{id}/images:
+    patch:
+      summary: Update airport images
+      tags:
+        - Airports
+      security:
+        - Bearer: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          description: Images data
+          required: true
+          schema:
+            type: object
+            properties:
+              images:
+                type: array
+                items:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: Airport images updated successfully
+          schema:
+            $ref: '#/definitions/Airports'
+  /airports/{id}/images/{image_name}:
+    delete:
+      summary: Delete a specific image from an airport
+      tags:
+        - Airports
+      security:
+        - Bearer: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+        - name: image_name
+          in: path
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Image deleted successfully
+  /airports/pending/{id}:
+    get:
+      summary: Get a pending airport by ID
+      tags:
+        - Airports
+      security:
+        - Bearer: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+      responses:
+        '200':
+          description: A pending airport
+          schema:
+            $ref: '#/definitions/Airports'
+  /airports/approve_update/{id}:
+    post:
+      summary: Approve an update to an airport
+      tags:
+        - Airports
+      security:
+        - Bearer: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Airport update approved
+  /airports/approve/{id}:
+    post:
+      summary: Approve an airport
+      tags:
+        - Airports
+      security:
+        - Bearer: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Airport approved
+  /airports/nearby:
+    get:
+      summary: Get nearby airports
+      tags:
+        - Airports
+      parameters:
+        - name: latitude
+          in: query
+          required: true
+          type: number
+        - name: longitude
+          in: query
+          required: true
+          type: number
+      responses:
+        '200':
+          description: A list of nearby airports
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Airports'
+  /hospitals:
+    get:
+      summary: Get all hospitals
+      tags:
+        - Hospitals
+      parameters:
+        - name: lang
+          in: query
+          type: string
+          enum:
+            - en
+            - dr
+            - ps
+          required: false
+          description: Language for the response
+        - name: per_page
+          in: query
+          type: integer
+          required: false
+          description: Number of hospitals per page
+        - name: page
+          in: query
+          type: integer
+          required: false
+          description: Page number
+        - name: search
+          in: query
+          type: string
+          required: false
+          description: Search term
+        - name: status
+          in: query
+          type: string
+          required: false
+          description: Hospital status
+        - name: hasPending
+          in: query
+          type: boolean
+          required: false
+          description: Filter hospitals with pending updates
+      responses:
+        '200':
+          description: A list of hospitals
+        400:
+          description: 'Bad Request'
+        500:
+          description: 'Server Error'
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Hospitals'
+    post:
+      summary: Create a new hospital
+      tags:
+        - Hospitals
+      security:
+        - Bearer: []
+      parameters:
+        - name: body
+          in: body
+          description: Hospital data
+          required: true
+          schema:
+            type: object
+            properties:
+              images:
+                type: array
+                items:
+                  type: string
+                  format: binary
+              name:
+                type: string
+            required:
+              - name
+      responses:
+        '201':
+          description: Hospital created successfully
+          schema:
+            $ref: '#/definitions/Hospitals'
+  /hospitals/{id}:
+    get:
+      summary: Get a hospital by ID
+      tags:
+        - Hospitals
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+      responses:
+        '200':
+          description: A single hospital
+          schema:
+            $ref: '#/definitions/Hospitals'
+    patch:
+      summary: Update a hospital
+      tags:
+        - Hospitals
+      security:
+        - Bearer: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          description: Hospital data
+          required: true
+          schema:
+            type: object
+            properties:
+              images:
+                type: array
+                items:
+                  type: string
+                  format: binary
+              name:
+                type: string
+      responses:
+        '200':
+          description: Hospital updated successfully
+          schema:
+            $ref: '#/definitions/Hospitals'
+    delete:
+      summary: Delete a hospital
+      tags:
+        - Hospitals
+      security:
+        - Bearer: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Hospital deleted successfully
+  /hospitals/{id}/images:
+    patch:
+      summary: Update hospital images
+      tags:
+        - Hospitals
+      security:
+        - Bearer: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          description: Images data
+          required: true
+          schema:
+            type: object
+            properties:
+              images:
+                type: array
+                items:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: Hospital images updated successfully
+          schema:
+            $ref: '#/definitions/Hospitals'
+  /hospitals/{id}/images/{image_name}:
+    delete:
+      summary: Delete a specific image from a hospital
+      tags:
+        - Hospitals
+      security:
+        - Bearer: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+        - name: image_name
+          in: path
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Image deleted successfully
+  /hospitals/pending/{id}:
+    get:
+      summary: Get a pending hospital by ID
+      tags:
+        - Hospitals
+      security:
+        - Bearer: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+      responses:
+        '200':
+          description: A pending hospital
+          schema:
+            $ref: '#/definitions/Hospitals'
+  /hospitals/approve_update/{id}:
+    post:
+      summary: Approve an update to a hospital
+      tags:
+        - Hospitals
+      security:
+        - Bearer: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Hospital update approved
+  /hospitals/approve/{id}:
+    post:
+      summary: Approve a hospital
+      tags:
+        - Hospitals
+      security:
+        - Bearer: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Hospital approved
+  /hospitals/nearby:
+    get:
+      summary: Get nearby hospitals
+      tags:
+        - Hospitals
+      parameters:
+        - name: latitude
+          in: query
+          required: true
+          type: number
+        - name: longitude
+          in: query
+          required: true
+          type: number
+      responses:
+        '200':
+          description: A list of nearby hospitals
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Hospitals'
+  /hotels:
+    get:
+      summary: Get all hotels
+      tags:
+        - Hotels
+      parameters:
+        - name: lang
+          in: query
+          type: string
+          enum:
+            - en
+            - dr
+            - ps
+          required: false
+          description: Language for the response
+        - name: per_page
+          in: query
+          type: integer
+          required: false
+          description: Number of hotels per page
+        - name: page
+          in: query
+          type: integer
+          required: false
+          description: Page number
+        - name: search
+          in: query
+          type: string
+          required: false
+          description: Search term
+        - name: status
+          in: query
+          type: string
+          required: false
+          description: Hotel status
+        - name: hasPending
+          in: query
+          type: boolean
+          required: false
+          description: Filter hotels with pending updates
+      responses:
+        '200':
+          description: A list of hotels
+        400:
+          description: 'Bad Request'
+        500:
+          description: 'Server Error'
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Hotels'
+    post:
+      summary: Create a new hotel
+      tags:
+        - Hotels
+      security:
+        - Bearer: []
+      parameters:
+        - name: body
+          in: body
+          description: Hotel data
+          required: true
+          schema:
+            type: object
+            properties:
+              images:
+                type: array
+                items:
+                  type: string
+                  format: binary
+              name:
+                type: string
+            required:
+              - name
+      responses:
+        '201':
+          description: Hotel created successfully
+          schema:
+            $ref: '#/definitions/Hotels'
+  /hotels/{id}:
+    get:
+      summary: Get a hotel by ID
+      tags:
+        - Hotels
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+      responses:
+        '200':
+          description: A single hotel
+          schema:
+            $ref: '#/definitions/Hotels'
+    patch:
+      summary: Update a hotel
+      tags:
+        - Hotels
+      security:
+        - Bearer: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          description: Hotel data
+          required: true
+          schema:
+            type: object
+            properties:
+              images:
+                type: array
+                items:
+                  type: string
+                  format: binary
+              name:
+                type: string
+      responses:
+        '200':
+          description: Hotel updated successfully
+          schema:
+            $ref: '#/definitions/Hotels'
+    delete:
+      summary: Delete a hotel
+      tags:
+        - Hotels
+      security:
+        - Bearer: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Hotel deleted successfully
+  /hotels/{id}/images:
+    patch:
+      summary: Update hotel images
+      tags:
+        - Hotels
+      security:
+        - Bearer: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          description: Images data
+          required: true
+          schema:
+            type: object
+            properties:
+              images:
+                type: array
+                items:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: Hotel images updated successfully
+          schema:
+            $ref: '#/definitions/Hotels'
+  /hotels/{id}/images/{image_name}:
+    delete:
+      summary: Delete a specific image from a hotel
+      tags:
+        - Hotels
+      security:
+        - Bearer: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+        - name: image_name
+          in: path
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Image deleted successfully
+  /hotels/pending/{id}:
+    get:
+      summary: Get a pending hotel by ID
+      tags:
+        - Hotels
+      security:
+        - Bearer: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+      responses:
+        '200':
+          description: A pending hotel
+          schema:
+            $ref: '#/definitions/Hotels'
+  /hotels/approve_update/{id}:
+    post:
+      summary: Approve an update to a hotel
+      tags:
+        - Hotels
+      security:
+        - Bearer: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Hotel update approved
+  /hotels/approve/{id}:
+    post:
+      summary: Approve a hotel
+      tags:
+        - Hotels
+      security:
+        - Bearer: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Hotel approved
+  /hotels/nearby:
+    get:
+      summary: Get nearby hotels
+      tags:
+        - Hotels
+      parameters:
+        - name: latitude
+          in: query
+          required: true
+          type: number
+        - name: longitude
+          in: query
+          required: true
+          type: number
+      responses:
+        '200':
+          description: A list of nearby hotels
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Hotels'
+  /parks:
+    get:
+      summary: Get all parks
+      tags:
+        - Parks
+      parameters:
+        - name: lang
+          in: query
+          type: string
+          enum:
+            - en
+            - dr
+            - ps
+          required: false
+          description: Language for the response
+        - name: per_page
+          in: query
+          type: integer
+          required: false
+          description: Number of parks per page
+        - name: page
+          in: query
+          type: integer
+          required: false
+          description: Page number
+        - name: search
+          in: query
+          type: string
+          required: false
+          description: Search term
+        - name: status
+          in: query
+          type: string
+          required: false
+          description: Park status
+        - name: hasPending
+          in: query
+          type: boolean
+          required: false
+          description: Filter parks with pending updates
+      responses:
+        '200':
+          description: A list of parks
+        400:
+          description: 'Bad Request'
+        500:
+          description: 'Server Error'
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Parks'
+    post:
+      summary: Create a new park
+      tags:
+        - Parks
+      security:
+        - Bearer: []
+      parameters:
+        - name: body
+          in: body
+          description: Park data
+          required: true
+          schema:
+            type: object
+            properties:
+              images:
+                type: array
+                items:
+                  type: string
+                  format: binary
+              name:
+                type: string
+            required:
+              - name
+      responses:
+        '201':
+          description: Park created successfully
+          schema:
+            $ref: '#/definitions/Parks'
+  /parks/{id}:
+    get:
+      summary: Get a park by ID
+      tags:
+        - Parks
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+      responses:
+        '200':
+          description: A single park
+          schema:
+            $ref: '#/definitions/Parks'
+    patch:
+      summary: Update a park
+      tags:
+        - Parks
+      security:
+        - Bearer: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          description: Park data
+          required: true
+          schema:
+            type: object
+            properties:
+              images:
+                type: array
+                items:
+                  type: string
+                  format: binary
+              name:
+                type: string
+      responses:
+        '200':
+          description: Park updated successfully
+          schema:
+            $ref: '#/definitions/Parks'
+    delete:
+      summary: Delete a park
+      tags:
+        - Parks
+      security:
+        - Bearer: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Park deleted successfully
+  /parks/{id}/images:
+    patch:
+      summary: Update park images
+      tags:
+        - Parks
+      security:
+        - Bearer: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          description: Images data
+          required: true
+          schema:
+            type: object
+            properties:
+              images:
+                type: array
+                items:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: Park images updated successfully
+          schema:
+            $ref: '#/definitions/Parks'
+  /parks/{id}/images/{image_name}:
+    delete:
+      summary: Delete a specific image from a park
+      tags:
+        - Parks
+      security:
+        - Bearer: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+        - name: image_name
+          in: path
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Image deleted successfully
+  /parks/pending/{id}:
+    get:
+      summary: Get a pending park by ID
+      tags:
+        - Parks
+      security:
+        - Bearer: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+      responses:
+        '200':
+          description: A pending park
+          schema:
+            $ref: '#/definitions/Parks'
+  /parks/approve_update/{id}:
+    post:
+      summary: Approve an update to a park
+      tags:
+        - Parks
+      security:
+        - Bearer: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Park update approved
+  /parks/approve/{id}:
+    post:
+      summary: Approve a park
+      tags:
+        - Parks
+      security:
+        - Bearer: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Park approved
+  /parks/nearby:
+    get:
+      summary: Get nearby parks
+      tags:
+        - Parks
+      parameters:
+        - name: latitude
+          in: query
+          required: true
+          type: number
+        - name: longitude
+          in: query
+          required: true
+          type: number
+      responses:
+        '200':
+          description: A list of nearby parks
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Parks'
 definitions:
   User:
     type: object
@@ -428,31 +1698,7 @@ definitions:
         type: boolean
       hasPending:
         type: boolean
-      airports:
-        type: array
-        items:
-          $ref: '#/definitions/Airports'
-      districts:
-        type: array
-        items:
-          $ref: '#/definitions/Districs'
-      hospitals:
-        type: array
-        items:
-          $ref: '#/definitions/Hospitals'
-      hotels:
-        type: array
-        items:
-          $ref: '#/definitions/Hotels'
-      parks:
-        type: array
-        items:
-          $ref: '#/definitions/Parks'
-      touristicPlaces:
-        type: array
-        items:
-          $ref: '#/definitions/TouristicPlaces'
-  Districs:
+  Districts:
     type: object
     properties:
       _id:
@@ -500,6 +1746,7 @@ definitions:
           type: string
       province_id:
         type: string
+        $ref: '#/definitions/Province'
       status:
         type: boolean
       hasPending:
@@ -548,6 +1795,7 @@ definitions:
         type: boolean
       province_id:
         type: string
+        $ref: '#/definitions/Province'
   Hospitals:
     type: object
     properties:
@@ -594,6 +1842,7 @@ definitions:
         type: string
       province_id:
         type: string
+        $ref: '#/definitions/Province'
       hasPending:
         type: boolean
       status:
@@ -637,6 +1886,7 @@ definitions:
         type: boolean
       province_id:
         type: string
+        $ref: '#/definitions/Province'
       location:
         type: object
         properties:
@@ -686,6 +1936,7 @@ definitions:
         type: boolean
       province_id:
         type: string
+        $ref: '#/definitions/Province'
   TouristicPlaces:
     type: object
     properties:
@@ -720,6 +1971,7 @@ definitions:
         type: string
       province_id:
         type: string
+        $ref: '#/definitions/Province'
       images:
         type: array
         items:
